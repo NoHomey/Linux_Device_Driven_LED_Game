@@ -1,13 +1,7 @@
-#include <linux/module.h>
-#include <linux/moduleparam.h>
-#include <linux/kernel.h>
 #include <linux/gpio.h>
-#include <linux/sched.h>
-#include <linux/tty.h>
-#include <linux/sysfs.h>
-#include <linux/stat.h>
 
-#define CONST_Param S_IRUSR | S_IRGRP | S_IROTH
+#ifndef _TLC5947_LED_MATRIX_H
+#define _TLC5947_LED_MATRIX_H
 
 #define TLC5947_LEDS 24
 #define TLC5947_MAXPWM 4096
@@ -26,24 +20,7 @@ struct gpio tlc5947[3] = {
 	{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 LATCH" },
 };
 
-module_param(tlc5947_chips, int, CONST_Param);
-MODULE_PARM_DESC(tlc5967_chips, "Number of tlc5967 chips that are connected.");
-module_param(tlc5947_data, int, CONST_Param);
-MODULE_PARM_DESC(tlc5967_data, "Number of gpio pin on wich DATA signal is connected (BCM Enum).");
-module_param(tlc5947_clock, int, CONST_Param);
-MODULE_PARM_DESC(tlc5967_clock, "Number of gpio pin on wich CLOCK signal is connected (BCM Enum).");
-module_param(tlc5947_latch, int, CONST_Param);
-MODULE_PARM_DESC(tlc5967_latch, "Number of gpio pin on wich LATCH signal is connected (BCM Enum).");
-module_param(tlc5947_pwm, int, CONST_Param);
-MODULE_PARM_DESC(tlc5967_pwm, "Number of pwm to be written.");
+int __init tlc5947_init(void);
+void __exit tlc5947_exit(void);
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Ivo Stratev");
-MODULE_DESCRIPTION("Basic Linux Kernel module using GPIOs to drive tlc5947");
-MODULE_SUPPORTED_DEVICE("tlc5947");
-
-int request_gpios(struct gpio* gpios, const int length);
-void free_gpios(struct gpio* gpios, const int length);
-
-int __init test_init(void);
-void __exit test_exit(void);
+#endif
