@@ -1,40 +1,75 @@
 #include <linux/module.h>
+#include <linux/moduleparam.h>
 #include <linux/kernel.h>
 #include <linux/gpio.h>
+#include <linux/sched.h>
+#include <linux/tty.h>
+#include <linux/sysfs.h>
+#include <linux/stat.h>
 
-#define DATA_ 17
-#define CLOCK_ 27
-#define LATCH_ 22
-#define NUM_ 8
-#define LEDS_ 24
-#define MAXPWM_ 4096
-#define PWM_ 2048
+#define CONST_Param S_IRUSR | S_IRGRP | S_IROTH
 
-static struct gpio tlc5947[] = {
-		{ DATA_, GPIOF_OUT_INIT_HIGH, "DATA" },
-		{ CLOCK_, GPIOF_OUT_INIT_HIGH, "CLOCK" },
-		{ LATCH_, GPIOF_OUT_INIT_HIGH, "LATCH" },
+#define TLC5947_LEDS 24
+#define TLC5947_MAXPWM 4096
+#define GPIO_HIGH 1
+#define GPIO_LOW 0
+
+int tlc5947_chips = 8;
+int tlc5947_data = 17;
+int tlc5947_clock = 27;
+int tlc5947_latch = 22;
+int tlc5947_pwm = 450;
+
+module_param(tlc5947_chips, int, CONST_Param);
+MODULE_PARM_DESC(tlc5967_chips, "Number of tlc5967 chips that are connected.");
+module_param(tlc5947_data, int, CONST_Param);
+MODULE_PARM_DESC(tlc5967_data, "Number of gpio pin on wich DATA signal is connected (BCM Enum).");
+module_param(tlc5947_clock, int, CONST_Param);
+MODULE_PARM_DESC(tlc5967_clock, "Number of gpio pin on wich CLOCK signal is connected (BCM Enum).");
+module_param(tlc5947_latch, int, CONST_Param);
+MODULE_PARM_DESC(tlc5967_latch, "Number of gpio pin on wich LATCH signal is connected (BCM Enum).");
+module_param(tlc5947_pwm, int, CONST_Param);
+MODULE_PARM_DESC(tlc5967_pwm, "Number of pwm to be written.");
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Ivo Stratev");
+MODULE_DESCRIPTION("Basic Linux Kernel module using GPIOs to drive tlc5947");
+MODULE_SUPPORTED_DEVICE("tlc5947");
+
+int request_gpios(struct gpio* gpios, const int length) {
+	int request_error = gpio_request_array(gpios, length);
+	if(request_error) {
+		printk(KERN_ERR "Unable to request GPIOs!\n Calling gpio_request_array() returned %d\n", request_error);
+	}
+	return request_error;
+}
+
+void free_gpios(struct gpio* gpios, const int length) {
+	gpio_free_array(gpios, length);
+}
+
+static struct gpio tlc5947[3] = {
+		{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 DATA" },
+		{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 CLOCK" },
+		{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 LATCH" },
 };
 
 static int __init test_init(void) {
-    int ret = 0;
-	printk(KERN_INFO "%s\n", __func__);
-	ret = gpio_request_array(tlc5947, ARRAY_SIZE(tlc5947));
-	if (ret) {
-		printk(KERN_ERR "Unable to request GPIOs: %d\n", ret);
-	}
-	return ret;
+    tlc5947[0].gpio = tlc5947_data;
+	tlc5947[1].gpio = tlc5947_clock;
+	tlc5947[2].gpio = tlc5947_latch;
+	return request_gpios(tlc5947, 3);
 }
 
 static void __exit test_exit(void) {
-    int i = NUM_ * LEDS_ - 1;
-    gpio_set_value(tlc5947[2].gpio, 0);
+    int i = tlc5947_chips * TLC5947_LEDS - 1;
+    gpio_set_value(tlc5947_latch, GPIO_LOW);
     while(1) {
         int bit = 11;
         while(1) {
-            gpio_set_value(tlc5947[1].gpio, 0);
-            gpio_set_value(tlc5947[0].gpio, (PWM_ & (1 << bit)) ? 1 : 0);
-            gpio_set_value(tlc5947[1].gpio, 1);
+            gpio_set_value(tlc5947_clock, GPIO_LOW);
+            gpio_set_value(tlc5947_data, (tlc5947_pwm & (1 << bit)) ? GPIO_HIGH : GPIO_LOW);
+            gpio_set_value(tlc5947_clock, GPIO_HIGH);
             if(bit == 0) {
                 break;
             }
@@ -45,15 +80,11 @@ static void __exit test_exit(void) {
         }
         i--;
     }
-    gpio_set_value(tlc5947[1].gpio, 0);
-    gpio_set_value(tlc5947[2].gpio, 1);
-    gpio_set_value(tlc5947[2].gpio, 0);
-    gpio_free_array(tlc5947, ARRAY_SIZE(tlc5947));
+    gpio_set_value(tlc5947_clock, GPIO_LOW);
+    gpio_set_value(tlc5947_latch, GPIO_HIGH);
+    gpio_set_value(tlc5947_latch, GPIO_LOW);
+	free_gpios(tlc5947, 3);
 }
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Ivo Stratev");
-MODULE_DESCRIPTION("Basic Linux Kernel module using GPIOs to drive tlc5947");
 
 module_init(test_init);
 module_exit(test_exit);
