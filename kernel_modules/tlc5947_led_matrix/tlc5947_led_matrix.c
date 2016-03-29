@@ -1,5 +1,6 @@
 #include "tlc5947_led_matrix.h"
 #include <linux/module.h>
+#include <linux/init.h>
 #include <linux/moduleparam.h>
 #include "common_helpers.h"
 
@@ -48,7 +49,7 @@ void __exit tlc5947_exit(void) {
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
-	free_gpios(tlc5947, 3);
+	gpio_free_array(tlc5947, 3);
 }
 
 module_init(tlc5947_init);

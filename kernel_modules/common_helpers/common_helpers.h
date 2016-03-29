@@ -7,6 +7,5 @@
 #define CONST_Param S_IRUSR | S_IRGRP | S_IROTH
 
 extern int request_gpios(struct gpio* gpios, const int length);
-extern void free_gpios(struct gpio* gpios, const int length);
 
 #endif

@@ -1,5 +1,5 @@
-target = tlc5947
-driver = tlc5947_led_matrix
+target = irq_pins
+driver = irq_pins_driver
 helpers = common_helpers
 
 obj-m := $(target).o
@@ -15,7 +15,7 @@ clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 
 activate:
-	insmod $(target).ko tlc5947_pwm=4000
+	insmod $(target).ko pins=x, y
 
 remove:
 	rmmod $(target)
