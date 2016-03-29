@@ -13,7 +13,7 @@ MODULE_DESCRIPTION("Basic Linux Kernel module that loggs interups on pins");
 MODULE_SUPPORTED_DEVICE("IRQ GPIOs");
 
 irqreturn_t irq_pins_interrupt(int irq, void* dev_id) {
-    printk(KERN_INFO "irq is %d\n", irq);
+    printk(KERN_INFO "irq is: %d dev_id is: %d\n", irq, *((int*) dev_id));
     return IRQ_HANDLED;
 }
 
@@ -24,7 +24,7 @@ int __init irq_pins_init(void) {
     for(i = 0; i < irq_pins_init_length; ++i) {
         irq_pins_gpio[i].gpio = irq_pins[i];
         irq_pins_gpio[i].flags = GPIOF_IN;
-        rq_pins_gpio[i].label = "IRQ Pin %d";
+        irq_pins_gpio[i].label = "IRQ Pin %d";
     }
     request_gpios_error = request_gpios(irq_pins_gpio, irq_pins_init_length);
 	if(!request_gpios_error) {
@@ -35,7 +35,7 @@ int __init irq_pins_init(void) {
                 printk(KERN_ERR "Unable to map GPIO to IRQ\nCalling gpio_to_irq() returned %d\n", irqs[i]);
                 return irqs[i];
             }
-            request_irq_error = request_irq(irqs[i], &irq_pins_interrupt, GPIO_INTERUPT, "irq gpios", NULL);
+            request_irq_error = request_irq(irqs[i], &irq_pins_interrupt, GPIO_INTERUPT, "irq gpios", (void*) (irq_pins + i));
             if(request_irq_error) {
                 printk(KERN_ERR "Unable to request INTERUP\nCalling request_irq() returned %d\n", request_irq_error);
                 return request_irq_error;
@@ -48,7 +48,7 @@ int __init irq_pins_init(void) {
 void __exit irq_pins_exit(void) {
     int i;
     for(i = 0; i < irq_pins_init_length; ++i) {
-        free_irq(irqs[i], NULL);
+        free_irq(irqs[i], (void*) (irq_pins + i));
     }
 	gpio_free_array(irq_pins_gpio, irq_pins_init_length);
 }

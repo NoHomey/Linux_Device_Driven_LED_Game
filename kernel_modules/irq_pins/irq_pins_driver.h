@@ -6,7 +6,7 @@
 #define _IRQ_PINS_H
 
 #define PINS 32
-#define GPIO_INTERUPT IRQF_TRIGGER_RISING
+#define GPIO_INTERUPT IRQF_TRIGGER_RISING | IRQF_SHARED
 
 int irqs[PINS];
 int irq_pins[PINS];

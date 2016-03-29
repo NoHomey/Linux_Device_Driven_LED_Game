@@ -16,7 +16,7 @@ clean:
 	rm ./$(target).*
 
 activate:
-	insmod $(target).ko pins=x, y
+	insmod $(target).ko irq_pins=17,27,22
 
 remove:
 	rmmod $(target)
