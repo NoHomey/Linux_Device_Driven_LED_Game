@@ -13,7 +13,7 @@ int irq_pins[PINS];
 struct gpio irq_pins_gpio[PINS];
 int irq_pins_init_length;
 
-irqreturn_t irq_pins_interrupt(int irq, void* dev_id, struct pt_regs*, regs);
+irqreturn_t irq_pins_interrupt(int irq, void* dev_id);
 int __init irq_pins_init(void);
 void __exit irq_pins_exit(void);
 

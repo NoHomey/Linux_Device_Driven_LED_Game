@@ -12,9 +12,9 @@ MODULE_AUTHOR("Borislav Stratev");
 MODULE_DESCRIPTION("Basic Linux Kernel module that loggs interups on pins");
 MODULE_SUPPORTED_DEVICE("IRQ GPIOs");
 
-irqreturn_t irq_pins_interrupt(int irq, void* dev_id, struct pt_regs*, regs) {
+irqreturn_t irq_pins_interrupt(int irq, void* dev_id) {
     printk(KERN_INFO "irq is %d\n", irq);
-    return (irq_handler_t) IRQ_HANDLED;
+    return IRQ_HANDLED;
 }
 
 int __init irq_pins_init(void) {
@@ -22,20 +22,20 @@ int __init irq_pins_init(void) {
     int request_gpios_error;
     int request_irq_error;
     for(i = 0; i < irq_pins_init_length; ++i) {
-        irq_pins_gpio[i].gpio = irq_pins_[i];
+        irq_pins_gpio[i].gpio = irq_pins[i];
         irq_pins_gpio[i].flags = GPIOF_IN;
-        sprintf(irq_pins_gpio[i].label, "IRQ Pin %d", irq_pins_[i]);
+        rq_pins_gpio[i].label = "IRQ Pin %d";
     }
-    request_error = request_gpios(irq_pins_gpio, irq_pins_init_length);
-	if(!request_error) {
+    request_gpios_error = request_gpios(irq_pins_gpio, irq_pins_init_length);
+	if(!request_gpios_error) {
         for(i = 0; i < irq_pins_init_length; ++i) {
-            gpio_set_debounce(irq_pins_gpio[i], 200);
-            irqs[i] = gpio_to_irq(irq_pins_gpio[i]);
+            gpio_set_debounce(irq_pins[i], 200);
+            irqs[i] = gpio_to_irq(irq_pins[i]);
             if(irqs[i] < 0) {
                 printk(KERN_ERR "Unable to map GPIO to IRQ\nCalling gpio_to_irq() returned %d\n", irqs[i]);
                 return irqs[i];
             }
-            request_irq_error = request_irq(irqs[i], irq_pins_interrupt, GPIO_INTERUPT, "irq gpios", NULL);
+            request_irq_error = request_irq(irqs[i], &irq_pins_interrupt, GPIO_INTERUPT, "irq gpios", NULL);
             if(request_irq_error) {
                 printk(KERN_ERR "Unable to request INTERUP\nCalling request_irq() returned %d\n", request_irq_error);
                 return request_irq_error;
@@ -46,6 +46,7 @@ int __init irq_pins_init(void) {
 }
 
 void __exit irq_pins_exit(void) {
+    int i;
     for(i = 0; i < irq_pins_init_length; ++i) {
         free_irq(irqs[i], NULL);
     }
