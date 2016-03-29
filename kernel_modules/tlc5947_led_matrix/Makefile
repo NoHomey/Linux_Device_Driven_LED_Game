@@ -13,7 +13,7 @@ $(helpers):
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
-	rm ./$(target).*
+	rm ./$(helpers).*
 
 activate:
 	insmod $(target).ko tlc5947_pwm=4000
