@@ -1,8 +1,40 @@
 #include "tlc5947_led_matrix.h"
+#include "common_helpers.h"
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/moduleparam.h>
-#include "common_helpers.h"
+#include <linux/gpio.h>
+#include "<linux/types.h>"
+#include <linux/stat.h>
+#include <linux/kernel.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/semaphore.h>
+#include <asm/uaccess.h>
+
+ushort tlc5947_chips = 255;
+ushort tlc5947_data = 255;
+ushort tlc5947_clock = 255;
+ushort tlc5947_latch = 255;
+
+static struct gpio tlc5947[TLC5947_GPIOS] = {
+	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 DATA"},
+	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 CLOCK"},
+	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 LATCH"},
+};
+
+static struct dev_t tlc5947_numbers;
+static int tlc5947_major_number;
+static int tlc5947_first_minor = 0;
+static unsigned int tlc5947_minor_count = 1;
+static struct file_operations tlc5947_file_operations = {
+    .owner = THIS_MODULE,
+    .open = tlc5947_file_open,
+    .release = tlc5947_file_close,
+    .write = tlc5947_file_write,
+};
+static struct cdev* tlc5947_cdev;
+static struct semaphore tlc5947_semaphore;
 
 module_param(tlc5947_chips, ushort, CONST_Param);
 MODULE_PARM_DESC(tlc5967_chips, "Number of tlc5967 chips that are chain connected.");
@@ -16,44 +48,32 @@ MODULE_PARM_DESC(tlc5967_latch, "Number of gpio pin on wich LATCH signal is conn
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Ivo Stratev");
 MODULE_DESCRIPTION("Basic Linux Kernel module using GPIOs to drive tlc5947");
-MODULE_SUPPORTED_DEVICE("tlc5947");
+MODULE_SUPPORTED_DEVICE(TLC5947_NAME);
 
-int is_tlc5947_param_set(ushort* tlc5947_param, const char* tlc5947_param_name) {
-    int is_255 = ((*tlc5947_param) == 255);
-    if(is_255) {
-        printk(KERN_ERR "Parameter %s value not setted when loading the module\n", tlc5947_param_name);
+static int tlc5947_file_open(struct inode* inode, struct file* file) {
+    if(down_interruptible(&tlc5947_semaphore) != 0) {
+        printk(KERN_ERR "Fail to open file /dev/%s\n" TLC5947_NAME);
+        return -EACCES;
     }
-    return is_255;
+    return 0;
 }
 
-int __init tlc5947_init(void) {
-    struct gpio tlc5947[3];
-    int init_ret = 0;
-    init_ret |= is_tlc5947_param_set(&tlc5947_chips, "tlc5947_chips");
-    init_ret |= is_tlc5947_param_set(&tlc5947_data, "tlc5947_data");
-    init_ret |= is_tlc5947_param_set(&tlc5947_clock, "tlc5947_clock");
-    init_ret |= is_tlc5947_param_set(&tlc5947_latch, "tlc5947_latch");
-    if(init_ret) {
-        return -EINVAL;
-    }
-    tlc5947[0].gpio = tlc5947_data;
-	tlc5947[1].gpio = tlc5947_clock;
-	tlc5947[2].gpio = tlc5947_latch;
-	init_ret = request_gpios(tlc5947, 3);
-    if(init_ret) {
-        return init_ret;
-    }
-}
-
-void __exit tlc5947_exit(void) {
+static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, size_t buffer_length, loff_t* offset) {
+    char data[10];
     unsigned int i;
+    unsigned long copy_ret = copy_from_user(data, buffer, buffer_length);
+    if(copy_ret) {
+        printk(KERN_ERR "Error while copying data\nCalling copy_from_user reurned%ld\n", copy_ret);
+        return copy_ret;
+    }
+    data[0] -= '0';
     i = tlc5947_chips * TLC5947_LEDS - 1;
     gpio_set_value(tlc5947_latch, GPIO_LOW);
     while(1) {
         unsigned char bit = 11;
         while(1) {
             gpio_set_value(tlc5947_clock, GPIO_LOW);
-            gpio_set_value(tlc5947_data, (400 & (1 << bit)) ? GPIO_HIGH : GPIO_LOW);
+            gpio_set_value(tlc5947_data, (data[0] & (1 << bit)) ? GPIO_HIGH : GPIO_LOW);
             gpio_set_value(tlc5947_clock, GPIO_HIGH);
             if(bit == 0) {
                 break;
@@ -68,7 +88,62 @@ void __exit tlc5947_exit(void) {
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
-	gpio_free_array(tlc5947, 3);
+
+    return copy_ret;
+}
+
+static int tlc5947_file_close(struct inode* inode, struct file* file) {
+    up(&tlc5947_semaphore);
+
+    return 0;
+}
+
+static int is_tlc5947_param_set(ushort* tlc5947_param, const char* tlc5947_param_name) {
+    int is_255 = (*tlc5947_param) == 255;
+    if(is_255) {
+        printk(KERN_ERR "Parameter %s value not setted when loading the module\n", tlc5947_param_name);
+    }
+
+    return is_255;
+}
+
+static int __init tlc5947_init(void) {
+    int init_ret = 0;
+    init_ret |= is_tlc5947_param_set(&tlc5947_chips, "tlc5947_chips");
+    init_ret |= is_tlc5947_param_set(&tlc5947_data, "tlc5947_data");
+    init_ret |= is_tlc5947_param_set(&tlc5947_clock, "tlc5947_clock");
+    init_ret |= is_tlc5947_param_set(&tlc5947_latch, "tlc5947_latch");
+    if(init_ret) {
+        return -EINVAL;
+    }
+    tlc5947[0].gpio = tlc5947_data;
+	tlc5947[1].gpio = tlc5947_clock;
+	tlc5947[2].gpio = tlc5947_latch;
+	init_ret = request_gpios(tlc5947, TLC5947_GPIOS);
+    if(init_ret) {
+        return init_ret;
+    }
+    init_ret = alloc_chrdev_region(&tlc5947_numbers, tlc5947_first_minor, tlc5947_minor_count, TLC5947_NAME);
+    if(init_ret) {
+        return init_ret;
+    }
+    tlc5947_major_number = MAJOR(tlc5947_numbers);
+    tlc5947_cdev = cdev_alloc();
+    tlc5947_cdev->owner = THIS_MODULE;
+    tlc5947_cdev->ops = &tlc5947_file_operations;
+    init_ret = cdev_add(tlc5947_cdev, tlc5947_numbers, tlc5947_minor_count);
+    if(init_ret) {
+        return init_ret;
+    }
+    sema_init(&tlc5947_semaphore, 1);
+
+    return 0;
+}
+
+static void __exit tlc5947_exit(void) {
+    cdev_del(tlc5967_cdev);
+    unregister_chrdev_region(tlc5947_numbers, tlc5947_minor_count);
+	gpio_free_array(tlc5947, TLC5947_GPIOS);
 }
 
 module_init(tlc5947_init);
