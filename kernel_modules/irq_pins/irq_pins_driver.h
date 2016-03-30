@@ -6,12 +6,12 @@
 #define _IRQ_PINS_H
 
 #define PINS 32
-#define GPIO_INTERUPT IRQF_TRIGGER_RISING | IRQF_SHARED
+#define GPIO_INTERUPT IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING | IRQF_SHARED
 
 int irqs[PINS];
-u8 irq_pins[PINS];
+int irq_pins[PINS];
 u8 irq_pins_value[PINS];
-u8 irq_pins_init_length;
+int irq_pins_init_length;
 
 irqreturn_t irq_pins_interrupt(int irq, void* dev_id);
 void fill_gpio_array(struct gpio* irq_pins_gpio);

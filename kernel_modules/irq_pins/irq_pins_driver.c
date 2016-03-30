@@ -4,7 +4,7 @@
 #include <linux/moduleparam.h>
 #include "common_helpers.h"
 
-module_param_array(irq_pins, u8, &irq_pins_init_length, CONST_Param);
+module_param_array(irq_pins, int, &irq_pins_init_length, CONST_Param);
 MODULE_PARM_DESC(irq_pins, "Number of pins for wich interup will be logged (BCM Enum).");
 
 MODULE_LICENSE("GPL");
@@ -13,18 +13,23 @@ MODULE_DESCRIPTION("Basic Linux Kernel module that loggs interups on pins");
 MODULE_SUPPORTED_DEVICE("IRQ GPIOs");
 
 irqreturn_t irq_pins_interrupt(int irq, void* dev_id) {
-    int id = *((int*) dev_id;
-    u8 i;
-    u8 value = gpio_get_value(id);
-    u8 change = 0;
+    int id;
+    u8 i, value, change;
+    id  = *((int*) dev_id);
+    printk(KERN_INFO "%d %d\n", irq, id);
+    value = gpio_get_value(id);
+    change = 255;
     for(i = 0; i < irq_pins_init_length; ++i) {
         if(irq_pins[i] == id) {
             if((irq_pins_value[i] == 2) || (irq_pins_value[i] != value)) {
                 change = i;
             }
+            printk(KERN_INFO "%d %d %d\n", change, irq_pins_value[i], value);
+            break;
         }
     }
-    if(change) {
+    printk(KERN_INFO "change: %d\n", change);
+    if(change < 255) {
         irq_pins_value[change] = value;
         printk(KERN_INFO "pin has changed %d\n", change);
     }
@@ -56,6 +61,7 @@ int __init irq_pins_init(void) {
                 printk(KERN_ERR "Unable to map GPIO to IRQ\nCalling gpio_to_irq() returned %d\n", irqs[i]);
                 return irqs[i];
             }
+            printk(KERN_INFO "irq: %d\n", irqs[i]);
             request_irq_error = request_irq(irqs[i], &irq_pins_interrupt, GPIO_INTERUPT, "irq gpios", (void*) (irq_pins + i));
             if(request_irq_error) {
                 printk(KERN_ERR "Unable to request INTERUP\nCalling request_irq() returned %d\n", request_irq_error);
