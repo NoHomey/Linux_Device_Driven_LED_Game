@@ -13,6 +13,7 @@
 #define GPIO_HIGH 1
 #define GPIO_LOW 0
 #define TLC5947_NAME "tlc5947"
+#define CONST_PARAM S_IRUSR | S_IRGRP | S_IROTH
 
 ushort tlc5947_chips = 255;
 ushort tlc5947_data = 255;

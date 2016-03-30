@@ -1,5 +1,4 @@
 #include "tlc5947_led_matrix.h"
-#include "common_helpers.h"
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/moduleparam.h>
@@ -12,13 +11,13 @@
 #include <asm/uaccess.h>
 #include <asm/errno.h>
 
-module_param(tlc5947_chips, ushort, CONST_Param);
+module_param(tlc5947_chips, ushort, CONST_PARAM);
 MODULE_PARM_DESC(tlc5967_chips, "Number of tlc5967 chips that are chain connected.");
-module_param(tlc5947_data, ushort, CONST_Param);
+module_param(tlc5947_data, ushort, CONST_PARAM);
 MODULE_PARM_DESC(tlc5967_data, "Number of gpio pin on wich DATA signal is connected (BCM Enum).");
-module_param(tlc5947_clock, ushort, CONST_Param);
+module_param(tlc5947_clock, ushort, CONST_PARAM);
 MODULE_PARM_DESC(tlc5967_clock, "Number of gpio pin on wich CLOCK signal is connected (BCM Enum).");
-module_param(tlc5947_latch, ushort, CONST_Param);
+module_param(tlc5947_latch, ushort, CONST_PARAM);
 MODULE_PARM_DESC(tlc5967_latch, "Number of gpio pin on wich LATCH signal is connected (BCM Enum).");
 
 MODULE_LICENSE("GPL");
@@ -32,7 +31,6 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
         return -EBUSY;
     }
     tlc5947_file_opened = 1;
-    MOD_INC_USE_COUNT;
 
     return 0;
 }
@@ -73,7 +71,6 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
 
 static int tlc5947_file_close(struct inode* inode, struct file* file) {
     tlc5947_file_opened = 0;
-    MOD_DEC_USE_COUNT;
 
     return 0;
 }
@@ -99,8 +96,9 @@ static int __init tlc5947_init(void) {
     tlc5947[0].gpio = tlc5947_data;
 	tlc5947[1].gpio = tlc5947_clock;
 	tlc5947[2].gpio = tlc5947_latch;
-	init_ret = request_gpios(tlc5947, TLC5947_GPIOS);
+	init_ret = gpio_request_array(tlc5947, TLC5947_GPIOS);
     if(init_ret) {
+        printk(KERN_ERR "Unable to request GPIOs!\nCalling gpio_request_array returned %d\n", init_ret);
         return init_ret;
     }
     init_ret = alloc_chrdev_region(&tlc5947_numbers, tlc5947_first_minor, tlc5947_minor_count, TLC5947_NAME);
