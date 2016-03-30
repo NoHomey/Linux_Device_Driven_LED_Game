@@ -1,5 +1,5 @@
 #include <linux/gpio.h>
-#include "<linux/types.h>"
+#include <linux/types.h>
 #include <linux/stat.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
@@ -26,16 +26,11 @@ static struct gpio tlc5947[TLC5947_GPIOS] = {
 	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 LATCH"},
 };
 
-static struct dev_t tlc5947_numbers;
+static dev_t tlc5947_numbers;
 static int tlc5947_major_number;
 static int tlc5947_first_minor = 0;
 static unsigned int tlc5947_minor_count = 1;
-static struct file_operations tlc5947_file_operations = {
-    .owner = THIS_MODULE,
-    .open = tlc5947_file_open,
-    .release = tlc5947_file_close,
-    .write = tlc5947_file_write,
-};
+static struct file_operations tlc5947_file_operations;
 static struct cdev* tlc5947_cdev;
 static struct semaphore tlc5947_semaphore;
 

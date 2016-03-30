@@ -4,37 +4,13 @@
 #include <linux/init.h>
 #include <linux/moduleparam.h>
 #include <linux/gpio.h>
-#include "<linux/types.h>"
+#include <linux/types.h>
 #include <linux/stat.h>
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/semaphore.h>
 #include <asm/uaccess.h>
-
-ushort tlc5947_chips = 255;
-ushort tlc5947_data = 255;
-ushort tlc5947_clock = 255;
-ushort tlc5947_latch = 255;
-
-static struct gpio tlc5947[TLC5947_GPIOS] = {
-	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 DATA"},
-	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 CLOCK"},
-	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 LATCH"},
-};
-
-static struct dev_t tlc5947_numbers;
-static int tlc5947_major_number;
-static int tlc5947_first_minor = 0;
-static unsigned int tlc5947_minor_count = 1;
-static struct file_operations tlc5947_file_operations = {
-    .owner = THIS_MODULE,
-    .open = tlc5947_file_open,
-    .release = tlc5947_file_close,
-    .write = tlc5947_file_write,
-};
-static struct cdev* tlc5947_cdev;
-static struct semaphore tlc5947_semaphore;
 
 module_param(tlc5947_chips, ushort, CONST_Param);
 MODULE_PARM_DESC(tlc5967_chips, "Number of tlc5967 chips that are chain connected.");
@@ -52,7 +28,7 @@ MODULE_SUPPORTED_DEVICE(TLC5947_NAME);
 
 static int tlc5947_file_open(struct inode* inode, struct file* file) {
     if(down_interruptible(&tlc5947_semaphore) != 0) {
-        printk(KERN_ERR "Fail to open file /dev/%s\n" TLC5947_NAME);
+        printk(KERN_ERR "Fail to open file /dev/%s\n", TLC5947_NAME);
         return -EACCES;
     }
     return 0;
@@ -125,14 +101,21 @@ static int __init tlc5947_init(void) {
     }
     init_ret = alloc_chrdev_region(&tlc5947_numbers, tlc5947_first_minor, tlc5947_minor_count, TLC5947_NAME);
     if(init_ret) {
+       printk(KERN_ERR "Could not allocate device numbers\nCalling alloc_chrdev_region returned %d\n", init_ret);
         return init_ret;
     }
     tlc5947_major_number = MAJOR(tlc5947_numbers);
+    printk(KERN_INFO "Device major number is %d. Use $ sudo make device\n", tlc5947_major_number);
     tlc5947_cdev = cdev_alloc();
     tlc5947_cdev->owner = THIS_MODULE;
+    tlc5947_file_operations.owner = THIS_MODULE;
+    tlc5947_file_operations.open = tlc5947_file_open;
+    tlc5947_file_operations.release = tlc5947_file_close;
+    tlc5947_file_operations.write = tlc5947_file_write;
     tlc5947_cdev->ops = &tlc5947_file_operations;
     init_ret = cdev_add(tlc5947_cdev, tlc5947_numbers, tlc5947_minor_count);
     if(init_ret) {
+        printk(KERN_ERR "Failed to add device numbers to struct cdev\nCalling cdev_add returned %d\n", init_ret);
         return init_ret;
     }
     sema_init(&tlc5947_semaphore, 1);
@@ -141,7 +124,7 @@ static int __init tlc5947_init(void) {
 }
 
 static void __exit tlc5947_exit(void) {
-    cdev_del(tlc5967_cdev);
+    cdev_del(tlc5947_cdev);
     unregister_chrdev_region(tlc5947_numbers, tlc5947_minor_count);
 	gpio_free_array(tlc5947, TLC5947_GPIOS);
 }
