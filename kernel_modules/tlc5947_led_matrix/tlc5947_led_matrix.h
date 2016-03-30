@@ -8,18 +8,13 @@
 #define GPIO_HIGH 1
 #define GPIO_LOW 0
 
-int tlc5947_chips = 8;
-int tlc5947_data = 17;
-int tlc5947_clock = 27;
-int tlc5947_latch = 22;
-int tlc5947_pwm = 450;
+unsigned char tlc5947_chips = 255;
+unsigned char tlc5947_data = 255;
+unsigned char tlc5947_clock = 255;
+unsigned char tlc5947_latch = 255;
 
-struct gpio tlc5947[3] = {
-	{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 DATA" },
-	{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 CLOCK" },
-	{ .gpio = -1, GPIOF_OUT_INIT_HIGH, "TLC5947 LATCH" },
-};
-
+int is_tlc5947_param_set(unsigned char* tlc5947_param, const char* tlc5947_param_name);
+void tlc5947_gpio_array(struct gpio* tlc5947);
 int __init tlc5947_init(void);
 void __exit tlc5947_exit(void);
 

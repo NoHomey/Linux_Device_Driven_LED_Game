@@ -16,7 +16,7 @@ clean:
 	rm ./$(helpers).*
 
 activate:
-	insmod $(target).ko tlc5947_pwm=4000
+	insmod $(target).ko tlc5947_chips=8 tlc5947_data=17 tlc5947_clock=27 tlc5947_latch=22
 
 remove:
 	rmmod $(target)
