@@ -26,19 +26,6 @@ int is_tlc5947_param_set(ushort* tlc5947_param, const char* tlc5947_param_name) 
     return is_255;
 }
 
-void tlc5947_gpio_array(struct gpio* tlc5947) {
-    unsigned char i;
-    tlc5947[0].gpio = tlc5947_data;
-	tlc5947[1].gpio = tlc5947_clock;
-	tlc5947[2].gpio = tlc5947_latch;
-    tlc5947[0].label = "TLC5947 DATA";
-	tlc5947[1].label = "TLC5947 CLOCK";
-	tlc5947[2].label = "TLC5947 LATCH";
-    for(i = 0; i < 3; ++i) {
-        tlc5947[i].flags = GPIOF_OUT_INIT_HIGH;
-    }
-}
-
 int __init tlc5947_init(void) {
     struct gpio tlc5947[3];
     int init_ret = 0;
@@ -49,12 +36,16 @@ int __init tlc5947_init(void) {
     if(init_ret) {
         return -EINVAL;
     }
-    tlc5947_gpio_array(tlc5947);
-	return request_gpios(tlc5947, 3);
+    tlc5947[0].gpio = tlc5947_data;
+	tlc5947[1].gpio = tlc5947_clock;
+	tlc5947[2].gpio = tlc5947_latch;
+	init_ret = request_gpios(tlc5947, 3);
+    if(init_ret) {
+        return init_ret;
+    }
 }
 
 void __exit tlc5947_exit(void) {
-    struct gpio tlc5947[3];
     unsigned int i;
     i = tlc5947_chips * TLC5947_LEDS - 1;
     gpio_set_value(tlc5947_latch, GPIO_LOW);
@@ -77,7 +68,6 @@ void __exit tlc5947_exit(void) {
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
-    tlc5947_gpio_array(tlc5947);
 	gpio_free_array(tlc5947, 3);
 }
 
