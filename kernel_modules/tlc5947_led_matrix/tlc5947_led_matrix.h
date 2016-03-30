@@ -3,7 +3,6 @@
 #include <linux/stat.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
-#include <linux/semaphore.h>
 
 #ifndef _TLC5947_LED_MATRIX_H
 #define _TLC5947_LED_MATRIX_H
@@ -32,7 +31,7 @@ static int tlc5947_first_minor = 0;
 static unsigned int tlc5947_minor_count = 1;
 static struct file_operations tlc5947_file_operations;
 static struct cdev* tlc5947_cdev;
-static struct semaphore tlc5947_semaphore;
+static int tlc5947_file_opened = 0;
 
 static int tlc5947_file_open(struct inode* inode, struct file* file);
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, size_t buffer_length, loff_t* offset);

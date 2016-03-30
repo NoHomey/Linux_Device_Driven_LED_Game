@@ -9,8 +9,8 @@
 #include <linux/kernel.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
-#include <linux/semaphore.h>
 #include <asm/uaccess.h>
+#include <asm/errno.h>
 
 module_param(tlc5947_chips, ushort, CONST_Param);
 MODULE_PARM_DESC(tlc5967_chips, "Number of tlc5967 chips that are chain connected.");
@@ -27,10 +27,13 @@ MODULE_DESCRIPTION("Basic Linux Kernel module using GPIOs to drive tlc5947");
 MODULE_SUPPORTED_DEVICE(TLC5947_NAME);
 
 static int tlc5947_file_open(struct inode* inode, struct file* file) {
-    if(down_interruptible(&tlc5947_semaphore) != 0) {
+    if(tlc5947_file_opened == 1) {
         printk(KERN_ERR "Fail to open file /dev/%s\n", TLC5947_NAME);
-        return -EACCES;
+        return -EBUSY;
     }
+    tlc5947_file_opened = 1;
+    MOD_INC_USE_COUNT;
+
     return 0;
 }
 
@@ -69,7 +72,8 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
 }
 
 static int tlc5947_file_close(struct inode* inode, struct file* file) {
-    up(&tlc5947_semaphore);
+    tlc5947_file_opened = 0;
+    MOD_DEC_USE_COUNT;
 
     return 0;
 }
@@ -118,7 +122,6 @@ static int __init tlc5947_init(void) {
         printk(KERN_ERR "Failed to add device numbers to struct cdev\nCalling cdev_add returned %d\n", init_ret);
         return init_ret;
     }
-    sema_init(&tlc5947_semaphore, 1);
 
     return 0;
 }
