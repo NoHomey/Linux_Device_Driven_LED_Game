@@ -25,6 +25,7 @@ MODULE_DESCRIPTION("Basic Linux Kernel module using GPIOs to drive tlc5947");
 MODULE_SUPPORTED_DEVICE("tlc5947");
 
 static int tlc5947_file_open(struct inode* inode, struct file* file) {
+    printk(KERN_INFO "File open\n");
     if(tlc5947_file_opened == 1) {
         printk(KERN_ERR "Fail to open file /dev/tlc5947\n");
         return -EBUSY;
@@ -36,12 +37,14 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
     unsigned int i, bit;
+    printk(KERN_INFO "File write, length %d\n", length);
     tlc5947_buffer = kmalloc(length * sizeof(char), GFP_KERNEL);
     if(!tlc5947_buffer) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
     }
     return_value = copy_from_user(tlc5947_buffer, buffer, length);
+    printk(KERN_INFO "buffer[0-2] %d %d %d\n", buffer[0], buffer[1], buffer[2]);
     if(return_value > 0) {
         printk(KERN_ERR "Error while copying data\nCalling copy_from_user reurned%d\n", return_value);
         return -ENOMEM;
@@ -57,12 +60,14 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
+    printk(KERN_INFO "tlc5947 writen\n");
     kfree(tlc5947_buffer);
 
     return return_value;
 }
 
 static int tlc5947_file_close(struct inode* inode, struct file* file) {
+    printk(KERN_INFO "File close\n");
     tlc5947_file_opened = 0;
 
     return 0;
