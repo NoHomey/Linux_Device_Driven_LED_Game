@@ -11,7 +11,7 @@ load:
 	insmod tlc5947.ko tlc5947_data=17 tlc5947_clock=27 tlc5947_latch=22
 
 unload:
-	rmmod -rf tlc5947
+	rmmod -f tlc5947
 
 device:
 	mknod /dev/tlc5947 c 243 0

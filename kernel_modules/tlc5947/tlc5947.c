@@ -37,9 +37,9 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
     int i;
-    char bit;
+    //char bit;
     printk(KERN_INFO "File write, length %d\n", length);
-    tlc5947_buffer = kmalloc(length * sizeof(char), GFP_KERNEL);
+    tlc5947_buffer = kmalloc(length * sizeof(unsigned char), GFP_KERNEL);
     if(!tlc5947_buffer) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -52,12 +52,9 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
     }
     gpio_set_value(tlc5947_latch, GPIO_LOW);
     for(i = length - 1; i >= 0; --i) {
-        for(bit = 7; bit >= 0; --bit) {
-            gpio_set_value(tlc5947_clock, GPIO_LOW);
-            gpio_set_value(tlc5947_data, (tlc5947_buffer[i] & (1 << bit)) ? GPIO_HIGH : GPIO_LOW);
-            gpio_set_value(tlc5947_clock, GPIO_HIGH);
-        }
+        printk(KERN_INFO "buffer[%d] %d\n", i, buffer[i]);
     }
+    printk(KERN_INFO "buffer end\n");
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
