@@ -36,7 +36,8 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 }
 
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
-    unsigned int i, bit;
+    int i;
+    char bit;
     printk(KERN_INFO "File write, length %d\n", length);
     tlc5947_buffer = kmalloc(length * sizeof(char), GFP_KERNEL);
     if(!tlc5947_buffer) {
