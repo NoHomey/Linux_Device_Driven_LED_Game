@@ -52,7 +52,7 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
     }
     gpio_set_value(tlc5947_latch, GPIO_LOW);
     for(i = length - 1; i >= 0; --i) {
-        printk(KERN_INFO "buffer[%d] %d\n", i, buffer[i]);
+        printk(KERN_INFO "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", i, 1, (buffer[i] & 1), 2, (buffer[i] & 2), 3, (buffer[i] & 4), 4, (buffer[i] & 8), 5, (buffer[i] & 16), 6, (buffer[i] & 32), 7, (buffer[i] & 64));
     }
     printk(KERN_INFO "buffer end\n");
     gpio_set_value(tlc5947_clock, GPIO_LOW);
@@ -122,7 +122,7 @@ static int __init tlc5947_init(void) {
 static void __exit tlc5947_exit(void) {
     cdev_del(tlc5947_cdev);
     unregister_chrdev_region(tlc5947_numbers, tlc5947_minor_count);
-	gpio_free_array(tlc5947, TLC5947_GPIOS);
+    gpio_free_array(tlc5947, TLC5947_GPIOS);
 }
 
 module_init(tlc5947_init);

@@ -5,7 +5,6 @@ all: clean
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
-	rm -f /dev/tlc5947
 
 load:
 	insmod tlc5947.ko tlc5947_data=17 tlc5947_clock=27 tlc5947_latch=22
@@ -16,3 +15,6 @@ unload:
 device:
 	mknod /dev/tlc5947 c 243 0
 	chmod 777 /dev/tlc5947
+
+remove:
+	rm -f /dev/tlc5947
