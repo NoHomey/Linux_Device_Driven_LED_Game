@@ -12,9 +12,9 @@ int tlc5947_write(const uint16_t pwm, const uint8_t chips) {
         return -EINVAL;
     }
     for(i = 0; i < leds; i += 2) {
-        buffer[j++] = pwm | 255;
-        buffer[j++] = (pwm | 3840) + (pwm | 15);
-        buffer[j++] = pwm | 4080;
+        buffer[j++] = pwm & 255;
+        buffer[j++] = (pwm & 3840) + (pwm & 15);
+        buffer[j++] = pwm & 4080;
     }
     errno = 0;
     fd = open(LIBTLC5947_DEVICE, O_WRONLY);
