@@ -8,12 +8,12 @@
 #define LIBTLC5947_MAXPWM 4095
 
 struct tlc5947 {
-    int fd,
-    uint8_t chips,
-    uint16_t leds,
-    uint16_t length,
-    uint16_t* pwm,
-    unsigned char* buffer
+    int fd;
+    uint8_t chips;
+    uint16_t leds;
+    uint16_t length;
+    uint16_t* pwm;
+    unsigned char* buffer;
 };
 
 int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips);

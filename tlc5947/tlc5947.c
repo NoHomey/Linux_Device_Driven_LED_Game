@@ -1,12 +1,14 @@
 #include "tlc5947.h"
+#include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <stdio.h>
 
 int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips) {
     tlc5947->chips = chips;
     tlc5947->leds = chips * LIBTLC5947_LEDS;
-    tlc5947->length = leds + (leds / 2);
+    tlc5947->length = tlc5947->leds + (tlc5947->leds / 2);
     tlc5947->fd = open(LIBTLC5947_DEVICE, O_WRONLY);
     if(tlc5947->fd == -1) {
         return -errno;
@@ -41,11 +43,12 @@ int tlc5947_setLED(struct tlc5947* tlc5947, const uint16_t led, const uint16_t p
     return 0;
 }
 
-int tlc5947_setRGBLED(struct tlc5947* tlc5947, const uint16_t rgb, const uint16_t pwm*) {
+int tlc5947_setRGBLED(struct tlc5947* tlc5947, const uint16_t rgb, const uint16_t* pwm) {
     uint8_t i;
     int result = 0;
+    uint16_t led = rgb * 3;
     for(i = 0; i < 3; ++i) {
-        result |= tlc5947_setLED(tlc5947, rgb + i, pwm[i]);
+        result |= tlc5947_setLED(tlc5947, led + i, pwm[i]);
     }
 
     return result;

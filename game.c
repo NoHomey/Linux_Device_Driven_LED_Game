@@ -12,7 +12,7 @@ int main(void) {
         tlc5947_setRGBLED(&tlc5947, i, pwm);
     }
     printf("%d\n", tlc5947_write(&tlc5947));
-    tlc5947_free(tlc5947);
+    tlc5947_free(&tlc5947);
 
     return 0;
 }

@@ -60,7 +60,7 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
 
-    return return_value;
+    return length;
 }
 
 static int tlc5947_file_close(struct inode* inode, struct file* file) {
