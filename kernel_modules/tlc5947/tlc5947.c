@@ -36,10 +36,12 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
     int i, k;
-    tlc5947_buffer = kmalloc(length * sizeof(unsigned char), GFP_KERNEL);
     if(!tlc5947_buffer) {
-        printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
-        return -ENOMEM;
+        tlc5947_buffer = kmalloc(length * sizeof(unsigned char), GFP_KERNEL);
+        if(!tlc5947_buffer) {
+            printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
+            return -ENOMEM;
+        }
     }
     return_value = copy_from_user(tlc5947_buffer, buffer, length);
     if(return_value > 0) {
@@ -57,12 +59,14 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
-    kfree(tlc5947_buffer);
 
     return return_value;
 }
 
 static int tlc5947_file_close(struct inode* inode, struct file* file) {
+    if(tlc5947_buffer) {
+        kfree(tlc5947_buffer);
+    }
     tlc5947_file_opened = 0;
 
     return 0;
@@ -112,6 +116,7 @@ static int __init tlc5947_init(void) {
         return return_value;
     }
     tlc5947_file_opened = 0;
+    tlc5947_buffer = NULL;
 
     return 0;
 }
