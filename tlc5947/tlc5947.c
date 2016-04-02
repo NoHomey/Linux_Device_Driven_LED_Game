@@ -5,7 +5,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips) {
+int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips, const uint8_t wiring) {
     tlc5947->chips = chips;
     tlc5947->leds = chips * LIBTLC5947_LEDS;
     tlc5947->length = tlc5947->leds + (tlc5947->leds / 2);
@@ -21,6 +21,9 @@ int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips) {
     if(!tlc5947->buffer) {
         return -ENOMEM;
     }
+    tlc5947->wiring[0] = W_RED(wiring);
+    tlc5947->wiring[1] = W_GREEN(wiring);
+    tlc5947->wiring[2] = W_BLUE(wiring);
 
     return 0;
 }
@@ -47,8 +50,11 @@ int tlc5947_setRGBLED(struct tlc5947* tlc5947, const uint16_t rgb, const uint16_
     uint8_t i;
     int result = 0;
     uint16_t led = rgb * 3;
+    if(tlc5947->wiring[0] == tlc5947->wiring[1]) {
+        return -EPERM;
+    }
     for(i = 0; i < 3; ++i) {
-        result |= tlc5947_setLED(tlc5947, led + i, pwm[i]);
+        result |= tlc5947_setLED(tlc5947, led + tlc5947->wiring[i], pwm[i]);
     }
 
     return result;
