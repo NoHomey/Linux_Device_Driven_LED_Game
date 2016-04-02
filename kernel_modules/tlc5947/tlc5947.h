@@ -30,7 +30,7 @@ static unsigned int tlc5947_minor_count = 1;
 static struct file_operations tlc5947_file_operations;
 static struct cdev* tlc5947_cdev;
 static int tlc5947_file_opened = 0;
-char tlc5947_data*;
+char* tlc5947_buffer;
 
 static int tlc5947_file_open(struct inode* inode, struct file* file);
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset);

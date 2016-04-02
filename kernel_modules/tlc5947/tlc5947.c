@@ -36,28 +36,28 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
     unsigned int i, bit;
-    tlc5947_data = kmalloc(length * sizeof(char), GFP_KERNEL);
-    if(!tlc5947_data) {
+    tlc5947_buffer = kmalloc(length * sizeof(char), GFP_KERNEL);
+    if(!tlc5947_buffer) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
     }
-    retun_value = copy_from_user(tlc5947_data, buffer, length);
+    retun_value = copy_from_user(tlc5947_buffer, buffer, length);
     if(retun_value > 0) {
         printk(KERN_ERR "Error while copying data\nCalling copy_from_user reurned%ld\n", retun_value);
-        return retun_value;
+        return -ENOMEM;
     }
     gpio_set_value(tlc5947_latch, GPIO_LOW);
     for(i = length - 1; i >= 0; --i) {
         for(bit = 7; bit >= 0; --bit) {
             gpio_set_value(tlc5947_clock, GPIO_LOW);
-            gpio_set_value(tlc5947_data, (tlc5947_data[i] & (1 << bit)) ? GPIO_HIGH : GPIO_LOW);
+            gpio_set_value(tlc5947_data, (tlc5947_buffer[i] & (1 << bit)) ? GPIO_HIGH : GPIO_LOW);
             gpio_set_value(tlc5947_clock, GPIO_HIGH);
         }
     }
     gpio_set_value(tlc5947_clock, GPIO_LOW);
     gpio_set_value(tlc5947_latch, GPIO_HIGH);
     gpio_set_value(tlc5947_latch, GPIO_LOW);
-    kfree(tlc5947_data);
+    kfree(tlc5947_buffer);
 
     return return_value;
 }
