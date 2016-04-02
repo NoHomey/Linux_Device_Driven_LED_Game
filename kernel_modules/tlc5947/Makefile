@@ -1,16 +1,16 @@
 obj-m := tlc5947.o
 
-all:
+all: clean
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 	rm -f /dev/tlc5947
 
-activate:
+load:
 	insmod tlc5947.ko tlc5947_data=17 tlc5947_clock=27 tlc5947_latch=22
 
-remove:
+unload:
 	rmmod -rf tlc5947
 
 device:

@@ -41,9 +41,9 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
     }
-    retun_value = copy_from_user(tlc5947_buffer, buffer, length);
-    if(retun_value > 0) {
-        printk(KERN_ERR "Error while copying data\nCalling copy_from_user reurned%ld\n", retun_value);
+    return_value = copy_from_user(tlc5947_buffer, buffer, length);
+    if(return_value > 0) {
+        printk(KERN_ERR "Error while copying data\nCalling copy_from_user reurned%d\n", return_value);
         return -ENOMEM;
     }
     gpio_set_value(tlc5947_latch, GPIO_LOW);
@@ -92,7 +92,7 @@ static int __init tlc5947_init(void) {
         printk(KERN_ERR "Unable to request GPIOs!\nCalling gpio_request_array returned %d\n", return_value);
         return return_value;
     }
-    return_value = alloc_chrdev_region(&tlc5947_numbers, tlc5947_first_minor, tlc5947_minor_count, TLC5947_NAME);
+    return_value = alloc_chrdev_region(&tlc5947_numbers, tlc5947_first_minor, tlc5947_minor_count, "tlc5947");
     if(return_value) {
        printk(KERN_ERR "Could not allocate device numbers\nCalling alloc_chrdev_region returned %d\n", return_value);
        return return_value;
