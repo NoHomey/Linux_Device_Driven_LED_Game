@@ -36,8 +36,7 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 }
 
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
-    int i;
-    //char bit;
+    int i, k;
     printk(KERN_INFO "File write, length %d\n", length);
     tlc5947_buffer = kmalloc(length * sizeof(unsigned char), GFP_KERNEL);
     if(!tlc5947_buffer) {
@@ -52,7 +51,11 @@ static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, 
     }
     gpio_set_value(tlc5947_latch, GPIO_LOW);
     for(i = length - 1; i >= 0; --i) {
-        printk(KERN_INFO "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", i, 1, (buffer[i] & 1), 2, (buffer[i] & 2), 3, (buffer[i] & 4), 4, (buffer[i] & 8), 5, (buffer[i] & 16), 6, (buffer[i] & 32), 7, (buffer[i] & 64), 8, (buffer[i] & 128));
+        for(k = 7; k >= 0; --k) {
+	    gpio_set_value(tlc5947_clock, GPIO_LOW);
+            gpio_set_value(tlc5947_data, (tlc5947_buffer[i] & (1 << k)) ? GPIO_HIGH : GPIO_LOW);
+            gpio_set_value(tlc5947_clock, GPIO_HIGH);
+	}
     }
     printk(KERN_INFO "buffer end\n");
     gpio_set_value(tlc5947_clock, GPIO_LOW);
