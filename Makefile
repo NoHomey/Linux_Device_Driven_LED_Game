@@ -4,7 +4,7 @@ all:
 	gcc ./game.c -Wall -Werror -ltlc5947 -o game
 	./game
 
-clean: unload
+clean:
 	rm -f ./game
 	cd ./tlc5947 && make clean
 
