@@ -60,6 +60,15 @@ int tlc5947_setRGBLED(struct tlc5947* tlc5947, const uint16_t rgb, const uint16_
     return result;
 }
 
+int tlc5947_unsetLED(struct tlc5947* tlc5947, const uint16_t led) {
+    return tlc5947_setLED(tlc5947, led, 0);
+}
+
+int tlc5947_unsetRGBLED(struct tlc5947* tlc5947, const uint16_t rgb) {
+    uint16_t pwm[] = {0, 0, 0};
+    return tlc5947_setRGBLED(tlc5947, rgb, pwm);
+}
+
 int tlc5947_write(struct tlc5947* tlc5947) {
     int written;
     uint8_t i;
