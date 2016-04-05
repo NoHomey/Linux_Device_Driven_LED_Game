@@ -74,7 +74,7 @@ static int __init input_pins_init(void) {
         printk(KERN_ERR "Parameter input_pins value not setted when loading the module\n");
         return -EINVAL;
     }
-    input_pins_ids = (int*) kmalloc(input_pins_init_length * sizeof(int), GFP_KERNEL);
+    input_pins_ids = (u8*) kmalloc(input_pins_init_length * sizeof(u8), GFP_KERNEL);
     if(!input_pins_ids) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -89,7 +89,7 @@ static int __init input_pins_init(void) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
     }
-    input_pins_values = (int*) kmalloc(input_pins_init_length * sizeof(int), GFP_KERNEL);
+    input_pins_values = (u8*) kmalloc(input_pins_init_length * sizeof(u8), GFP_KERNEL);
     if(!input_pins_values) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -146,16 +146,16 @@ static int __init input_pins_init(void) {
 }
 
 static void __exit input_pins_exit(void) {
-    unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
     cdev_del(input_pins_cdev);
+    unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
     for(i = 0; i < input_pins_init_length; ++i) {
         free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
         gpio_free(input_pins[i]);
     }
-    kfree(input_pins_ids);
-    kfree(input_pins_irqs);
-    kfree(input_pins_buffer);
     kfree(input_pins_values);
+    kfree(input_pins_buffer);
+    kfree(input_pins_irqs);
+    kfree(input_pins_ids);
 }
 
 module_init(input_pins_init);

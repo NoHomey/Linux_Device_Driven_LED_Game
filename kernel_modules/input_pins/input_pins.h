@@ -14,8 +14,8 @@
 #define INPUT_PINS_DEBOUNCE 150
 #define INPUT_PINS_INTERRUPT IRQF_TRIGGER_RISING | IRQF_SHARED
 
-#define INPUT_PINS_MAP(i) ((i + 1) * 5) - 3
-#define INPUT_PINS_UNMAP(id) ((id + 3) / 5) - 1
+#define INPUT_PINS_MAP(i) ((i + 7) * 3) - 5
+#define INPUT_PINS_UNMAP(id) ((id + 5) / 3) - 7
 
 static int input_pins[INPUT_PINS_MAX];
 static int input_pins_init_length = 0;
@@ -29,10 +29,10 @@ static struct file_operations input_pins_file_operations;
 static struct cdev* input_pins_cdev;
 static int input_pins_file_opened = 0;
 static int input_pins_length;
-static int* input_pins_ids;
+static u8* input_pins_ids;
 static int* input_pins_irqs;
 static char* input_pins_buffer;
-static int* input_pins_values;
+static u8* input_pins_values;
 
 static int input_pins_file_open(struct inode* inode, struct file* file);
 static ssize_t input_pins_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset);
