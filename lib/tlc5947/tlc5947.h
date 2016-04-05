@@ -7,18 +7,18 @@
 #define LIBTLC5947_LEDS 24
 #define LIBTLC5947_MAXPWM 4095
 
-#define W_LED 0
-#define W_RGB 36
-#define W_GBR 18
-#define W_BRG 9
-#define W_RBG 25
-#define W_GRB 33
-#define W_BGR 6
-#define W_MASK 3
+#define Wir_LED 0
+#define Wir_RGB 36
+#define Wir_GBR 18
+#define Wir_BRG 9
+#define Wir_RBG 25
+#define Wir_GRB 33
+#define Wir_BGR 6
+#define Wir_MASK 3
 
-#define W_RED(w) w & W_MASK
-#define W_GREEN(w) (w >> 2) & W_MASK
-#define W_BLUE(w) (w >> 4) & W_MASK
+#define Wir_RED(w) w & Wir_MASK
+#define Wir_GREEN(w) (w >> 2) & Wir_MASK
+#define Wir_BLUE(w) (w >> 4) & Wir_MASK
 
 struct tlc5947 {
     int fd;

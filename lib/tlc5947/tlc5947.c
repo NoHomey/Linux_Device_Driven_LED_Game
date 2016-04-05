@@ -21,17 +21,17 @@ int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips, const uint8_t wir
     if(!tlc5947->buffer) {
         return -ENOMEM;
     }
-    tlc5947->wiring[0] = W_RED(wiring);
-    tlc5947->wiring[1] = W_GREEN(wiring);
-    tlc5947->wiring[2] = W_BLUE(wiring);
+    tlc5947->wiring[0] = Wir_RED(wiring);
+    tlc5947->wiring[1] = Wir_GREEN(wiring);
+    tlc5947->wiring[2] = Wir_BLUE(wiring);
 
     return 0;
 }
 
 void tlc5947_free(struct tlc5947* tlc5947) {
-    close(tlc5947->fd);
-    free(tlc5947->pwm);
     free(tlc5947->buffer);
+    free(tlc5947->pwm);
+    close(tlc5947->fd);
 }
 
 int tlc5947_setLED(struct tlc5947* tlc5947, const uint16_t led, const uint16_t pwm) {
@@ -80,7 +80,7 @@ int tlc5947_write(struct tlc5947* tlc5947) {
     }
     errno = 0;
     written = write(tlc5947->fd, (char*) tlc5947->buffer, tlc5947->length);
-    if(written < 1) {
+    if(written < 0) {
         tlc5947_free(tlc5947);
         return -errno;
     }
