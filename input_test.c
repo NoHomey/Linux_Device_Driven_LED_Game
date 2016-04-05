@@ -8,8 +8,7 @@ int main(void) {
 	int fd = open(DEVICE, O_RDWR);
 	const int length = 4;
 	char read_data[length];
-    char i;
-    char read_length;
+        int i, read_length;
 	if(fd == -1) {
 		printf("File %s not exist or is in use.\n", DEVICE);
 		return fd;

@@ -41,14 +41,17 @@ static ssize_t input_pins_file_read(struct file* file, char __user* buffer, cons
         }
     }
     if(!buffer_length) {
-        return -EIO;
+        return 0;
     }
     if(length < buffer_length) {
         return -EFAULT ;
     }
     return_value = copy_to_user(buffer, input_pins_buffer, buffer_length);
+    if(return_value > 0) {
+        return -EIO;
+    }
 
-    return return_value;
+    return buffer_length;
 }
 
 static int input_pins_file_close(struct inode* inode, struct file* file) {
@@ -60,7 +63,7 @@ static int input_pins_file_close(struct inode* inode, struct file* file) {
 static irqreturn_t input_pins_interrupt(int irq, void* dev_id) {
     int id = *((int*) dev_id);
     id = INPUT_PINS_UNMAP(id);
-    //input_pins_values[id] = 1;
+    input_pins_values[id] = 1;
     printk(KERN_INFO "irq %d id %d\n", irq, id);
 
     return IRQ_HANDLED;
@@ -143,16 +146,16 @@ static int __init input_pins_init(void) {
 }
 
 static void __exit input_pins_exit(void) {
+    unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
+    cdev_del(input_pins_cdev);
+    for(i = 0; i < input_pins_init_length; ++i) {
+        free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
+        gpio_free(input_pins[i]);
+    }
     kfree(input_pins_ids);
     kfree(input_pins_irqs);
     kfree(input_pins_buffer);
     kfree(input_pins_values);
-    for(i = 0; i < input_pins_init_length; ++i) {
-        gpio_free(input_pins[i]);
-        free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
-    }
-    unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
-    cdev_del(input_pins_cdev);
 }
 
 module_init(input_pins_init);
