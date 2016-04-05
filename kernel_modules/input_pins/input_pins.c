@@ -14,7 +14,7 @@
 #include <asm/uaccess.h>
 #include <asm/errno.h>
 
-module_param_array(input_pins, int, &input_pins_init_length, CONST_Param);
+module_param_array(input_pins, int, &input_pins_init_length, CONST_PARAM);
 MODULE_PARM_DESC(input_pins, "Number of pins for wich interrup will be logged (BCM Enum).");
 
 MODULE_LICENSE("GPL");
@@ -32,7 +32,7 @@ static int input_pins_file_open(struct inode* inode, struct file* file) {
     return 0;
 }
 
-static ssize_t input_pins_file_read(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
+static ssize_t input_pins_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset) {
     char buffer_length = 0;
     for(i = 0; i < input_pins_init_length; ++i) {
         if(input_pins_values[i]) {
@@ -46,9 +46,9 @@ static ssize_t input_pins_file_read(struct file* file, const char __user* buffer
     if(length < buffer_length) {
         return -EFAULT ;
     }
-    copy_to_user(buffer, input_pins_buffer, buffer_length);
+    return_value = copy_to_user(buffer, input_pins_buffer, buffer_length);
 
-    return buffer_length;
+    return return_value;
 }
 
 static int input_pins_file_close(struct inode* inode, struct file* file) {
@@ -71,7 +71,7 @@ static int __init input_pins_init(void) {
         printk(KERN_ERR "Parameter input_pins value not setted when loading the module\n");
         return -EINVAL;
     }
-    nput_pins_ids = (char*) kmalloc(input_pins_init_length * sizeof(char), GFP_KERNEL);
+    input_pins_ids = (u8*) kmalloc(input_pins_init_length * sizeof(u8), GFP_KERNEL);
     if(!input_pins_ids) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -86,7 +86,7 @@ static int __init input_pins_init(void) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
     }
-    input_pins_values = (char*) kmalloc(input_pins_init_length * sizeof(char), GFP_KERNEL);
+    input_pins_values = (u8*) kmalloc(input_pins_init_length * sizeof(u8), GFP_KERNEL);
     if(!input_pins_values) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -107,11 +107,11 @@ static int __init input_pins_init(void) {
         gpio_set_debounce(input_pins[i], INPUT_PINS_DEBOUNCE);
         input_pins_irqs[i] = gpio_to_irq(input_pins[i]);
         if(input_pins_irqs[i] < 0) {
-            printk(KERN_ERR "Unable to map GPIO to IRQ\nCalling gpio_to_irq() returned %d\n", irqs[i]);
+            printk(KERN_ERR "Unable to map GPIO to IRQ\nCalling gpio_to_irq() returned %d\n", input_pins_irqs[i]);
             return input_pins_irqs[i];
         }
         printk(KERN_INFO "irq: %d\n", input_pins_irqs[i]);
-        return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERUPT, "input pins", (void*) (input_pins_id + i));
+        return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERUPT, "input pins", (void*) (input_pins_ids + i));
         if(return_value) {
             printk(KERN_ERR "Unable to request INTERRUP\nCalling request_irq returned %d\n", return_value);
             return return_value;
@@ -149,7 +149,7 @@ static void __exit input_pins_exit(void) {
     kfree(input_pins_values);
     for(i = 0; i < input_pins_init_length; ++i) {
         gpio_free(input_pins[i]);
-        free_irq(input_pins_irqs[i], (void*) (input_pins_id + i));
+        free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
     }
     unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
     cdev_del(input_pins_cdev);

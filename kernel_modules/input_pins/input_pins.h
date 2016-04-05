@@ -9,6 +9,7 @@
 #ifndef _INPUT_PINS_H
 #define _INPUT_PINS_H
 
+#define CONST_PARAM S_IRUSR | S_IRGRP | S_IROTH
 #define INPUT_PINS_MAX 26
 #define INPUT_PINS_DEBOUNCE 150
 #define INPUT_PINS_INTERUPT IRQF_TRIGGER_RISING | IRQF_SHARED
@@ -27,14 +28,14 @@ static const unsigned int input_pins_minor_count = 1;
 static struct file_operations input_pins_file_operations;
 static struct cdev* input_pins_cdev;
 static int input_pins_file_opened = 0;
-static u8 input_pins_length;
-static char* input_pins_ids;
+static int input_pins_length;
+static u8* input_pins_ids;
 static int* input_pins_irqs;
 static char* input_pins_buffer;
-static char* input_pins_values;
+static u8* input_pins_values;
 
 static int input_pins_file_open(struct inode* inode, struct file* file);
-static ssize_t input_pins_file_read(struct file* file, const char __user* buffer, const size_t length, loff_t* offset);
+static ssize_t input_pins_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset);
 static int input_pins_file_close(struct inode* inode, struct file* file);
 static irqreturn_t input_pins_interrupt(int irq, void* dev_id);
 static int __init input_pins_init(void);
