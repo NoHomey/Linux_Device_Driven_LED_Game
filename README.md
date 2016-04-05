@@ -1,2 +1,2 @@
-# Linux_Divice_Driven_LED_GAME
-Linux_Divice_Driven_LED_GAME
+# Linux_Deivice_Driven_LED_Game
+Linux_Device_Driven_LED_Game
