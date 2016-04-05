@@ -58,10 +58,10 @@ static int input_pins_file_close(struct inode* inode, struct file* file) {
 }
 
 static irqreturn_t input_pins_interrupt(int irq, void* dev_id) {
-    char id;
-    id  = *((char*) dev_id);
+    u8 id = *((u8*) dev_id);
     id = INPUT_PINS_UNMAP(id);
-    input_pins_values[id] = 1;
+    //input_pins_values[id] = 1;
+    printk(KERN_INFO "irq %d id %d\n", irq, id);
 
     return IRQ_HANDLED;
 }

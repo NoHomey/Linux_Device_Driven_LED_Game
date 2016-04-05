@@ -14,8 +14,8 @@
 #define INPUT_PINS_DEBOUNCE 150
 #define INPUT_PINS_INTERUPT IRQF_TRIGGER_RISING | IRQF_SHARED
 
-#define INPUT_PINS_MAP(i) (i + 1) * 3 - 5
-#define INPUT_PINS_UNMAP(id) ((id + 5) / 3) - 1
+#define INPUT_PINS_MAP(i) ((i + 1) * 5) - 3
+#define INPUT_PINS_UNMAP(id) ((id + 3) / 5) - 1
 
 static int input_pins[INPUT_PINS_MAX];
 static int input_pins_init_length = 0;
