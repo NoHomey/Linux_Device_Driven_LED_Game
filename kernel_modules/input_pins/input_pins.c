@@ -33,7 +33,7 @@ static int input_pins_file_open(struct inode* inode, struct file* file) {
 }
 
 static ssize_t input_pins_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset) {
-    char buffer_length = 0;
+    int buffer_length = 0;
     for(i = 0; i < input_pins_init_length; ++i) {
         if(input_pins_values[i]) {
             input_pins_buffer[buffer_length++] = input_pins[i];
@@ -58,7 +58,7 @@ static int input_pins_file_close(struct inode* inode, struct file* file) {
 }
 
 static irqreturn_t input_pins_interrupt(int irq, void* dev_id) {
-    u8 id = *((u8*) dev_id);
+    int id = *((int*) dev_id);
     id = INPUT_PINS_UNMAP(id);
     //input_pins_values[id] = 1;
     printk(KERN_INFO "irq %d id %d\n", irq, id);
@@ -71,7 +71,7 @@ static int __init input_pins_init(void) {
         printk(KERN_ERR "Parameter input_pins value not setted when loading the module\n");
         return -EINVAL;
     }
-    input_pins_ids = (u8*) kmalloc(input_pins_init_length * sizeof(u8), GFP_KERNEL);
+    input_pins_ids = (int*) kmalloc(input_pins_init_length * sizeof(int), GFP_KERNEL);
     if(!input_pins_ids) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -86,7 +86,7 @@ static int __init input_pins_init(void) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
     }
-    input_pins_values = (u8*) kmalloc(input_pins_init_length * sizeof(u8), GFP_KERNEL);
+    input_pins_values = (int*) kmalloc(input_pins_init_length * sizeof(int), GFP_KERNEL);
     if(!input_pins_values) {
         printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
         return -ENOMEM;
@@ -111,11 +111,11 @@ static int __init input_pins_init(void) {
             return input_pins_irqs[i];
         }
         printk(KERN_INFO "irq: %d\n", input_pins_irqs[i]);
-        /*return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERRUPT, "input_pins", (void*) (input_pins_ids + i));
+        return_value = request_irq(input_pins_irqs[i], input_pins_interrupt, INPUT_PINS_INTERRUPT, "input_pins", (void*) (input_pins_ids + i));
         if(return_value) {
             printk(KERN_ERR "Unable to request INTERRUP\nCalling request_irq returned %d\n", return_value);
             return return_value;
-        }*/
+        }
     }
     return_value = alloc_chrdev_region(&input_pins_numbers, input_pins_first_minor, input_pins_minor_count, "input_pins");
     if(return_value) {
@@ -149,7 +149,7 @@ static void __exit input_pins_exit(void) {
     kfree(input_pins_values);
     for(i = 0; i < input_pins_init_length; ++i) {
         gpio_free(input_pins[i]);
-        //free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
+        free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
     }
     unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
     cdev_del(input_pins_cdev);

@@ -19,7 +19,7 @@
 
 static int input_pins[INPUT_PINS_MAX];
 static int input_pins_init_length = 0;
-static char i;
+static int i;
 static int return_value;
 static dev_t input_pins_numbers;
 static int input_pins_major_number;
@@ -29,10 +29,10 @@ static struct file_operations input_pins_file_operations;
 static struct cdev* input_pins_cdev;
 static int input_pins_file_opened = 0;
 static int input_pins_length;
-static u8* input_pins_ids;
+static int* input_pins_ids;
 static int* input_pins_irqs;
 static char* input_pins_buffer;
-static u8* input_pins_values;
+static int* input_pins_values;
 
 static int input_pins_file_open(struct inode* inode, struct file* file);
 static ssize_t input_pins_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset);
