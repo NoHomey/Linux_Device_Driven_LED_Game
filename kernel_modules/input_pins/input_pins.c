@@ -111,11 +111,11 @@ static int __init input_pins_init(void) {
             return input_pins_irqs[i];
         }
         printk(KERN_INFO "irq: %d\n", input_pins_irqs[i]);
-        return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERRUPT, "input_pins", (void*) (input_pins_ids + i));
+        /*return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERRUPT, "input_pins", (void*) (input_pins_ids + i));
         if(return_value) {
             printk(KERN_ERR "Unable to request INTERRUP\nCalling request_irq returned %d\n", return_value);
             return return_value;
-        }
+        }*/
     }
     return_value = alloc_chrdev_region(&input_pins_numbers, input_pins_first_minor, input_pins_minor_count, "input_pins");
     if(return_value) {
@@ -149,7 +149,7 @@ static void __exit input_pins_exit(void) {
     kfree(input_pins_values);
     for(i = 0; i < input_pins_init_length; ++i) {
         gpio_free(input_pins[i]);
-        free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
+        //free_irq(input_pins_irqs[i], (void*) (input_pins_ids + i));
     }
     unregister_chrdev_region(input_pins_numbers, input_pins_minor_count);
     cdev_del(input_pins_cdev);
