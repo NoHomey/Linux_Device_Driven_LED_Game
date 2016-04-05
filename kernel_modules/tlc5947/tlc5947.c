@@ -37,7 +37,7 @@ static int tlc5947_file_open(struct inode* inode, struct file* file) {
 static ssize_t tlc5947_file_write(struct file* file, const char __user* buffer, const size_t length, loff_t* offset) {
     int i, k;
     if(!tlc5947_buffer) {
-        tlc5947_buffer = kmalloc(length * sizeof(unsigned char), GFP_KERNEL);
+        tlc5947_buffer = (char*) kmalloc(length * sizeof(char), GFP_KERNEL);
         if(!tlc5947_buffer) {
             printk(KERN_ERR "Failed to allocate memmry!\nCalling kmalloc returned NULL\n");
             return -ENOMEM;
@@ -73,18 +73,15 @@ static int tlc5947_file_close(struct inode* inode, struct file* file) {
 }
 
 static int __init tlc5947_init(void) {
-    return_value = (tlc5947_data == 255);
-    if(return_value) {
+    if(tlc5947_data == 255) {
         printk(KERN_ERR "Parameter tlc5947_data value not setted when loading the module\n");
         return -EINVAL;
     }
-    return_value = (tlc5947_clock == 255);
-    if(return_value) {
+    if(tlc5947_clock == 255) {
         printk(KERN_ERR "Parameter tlc5947_clock value not setted when loading the module\n");
         return -EINVAL;
     }
-    return_value = (tlc5947_latch == 255);
-    if(return_value) {
+    if(tlc5947_latch == 255) {
         printk(KERN_ERR "Parameter tlc5947_latch value not setted when loading the module\n");
         return -EINVAL;
     }
@@ -102,7 +99,7 @@ static int __init tlc5947_init(void) {
        return return_value;
     }
     tlc5947_major_number = MAJOR(tlc5947_numbers);
-    printk(KERN_INFO "Device major number is %d. Use $ sudo make device\n", tlc5947_major_number);
+    printk(KERN_INFO "Device major number is %d. Use $ sudo make device major=%d\n", tlc5947_major_number, tlc5947_major_number);
     tlc5947_cdev = cdev_alloc();
     tlc5947_cdev->owner = THIS_MODULE;
     tlc5947_file_operations.owner = THIS_MODULE;

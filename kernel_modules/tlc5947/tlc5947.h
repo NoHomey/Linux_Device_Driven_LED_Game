@@ -17,16 +17,16 @@ ushort tlc5947_clock = 255;
 ushort tlc5947_latch = 255;
 
 static struct gpio tlc5947[TLC5947_GPIOS] = {
-	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 DATA"},
-	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 CLOCK"},
-	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947 LATCH"},
+	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947_DATA"},
+	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947_CLOCK"},
+	{.gpio = -1, .flags = GPIOF_OUT_INIT_HIGH, .label = "TLC5947_LATCH"},
 };
 
 static int return_value;
 static dev_t tlc5947_numbers;
 static int tlc5947_major_number;
-static int tlc5947_first_minor = 0;
-static unsigned int tlc5947_minor_count = 1;
+static const int tlc5947_first_minor = 0;
+static const unsigned int tlc5947_minor_count = 1;
 static struct file_operations tlc5947_file_operations;
 static struct cdev* tlc5947_cdev;
 static int tlc5947_file_opened = 0;
