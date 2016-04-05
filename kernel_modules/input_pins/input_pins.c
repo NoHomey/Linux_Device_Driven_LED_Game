@@ -2,6 +2,17 @@
 #include <linux/module.h>
 #include <linux/init.h>
 #include <linux/moduleparam.h>
+#include <linux/gpio.h>
+#include <linux/irq.h>
+#include <linux/interrupt.h>
+#include <linux/types.h>
+#include <linux/stat.h>
+#include <linux/kernel.h>
+#include <linux/fs.h>
+#include <linux/cdev.h>
+#include <linux/slab.h>
+#include <asm/uaccess.h>
+#include <asm/errno.h>
 
 module_param_array(input_pins, int, &input_pins_init_length, CONST_Param);
 MODULE_PARM_DESC(input_pins, "Number of pins for wich interrup will be logged (BCM Enum).");
