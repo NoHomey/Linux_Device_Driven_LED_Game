@@ -20,7 +20,7 @@ MODULE_PARM_DESC(input_pins, "Number of pins for wich interrup will be logged (B
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Borislav Stratev");
 MODULE_DESCRIPTION("Basic Linux Kernel module that loggs interrups on input pins");
-MODULE_SUPPORTED_DEVICE("IRQ GPIOs");
+MODULE_SUPPORTED_DEVICE("IRQ_GPIOs");
 
 static int input_pins_file_open(struct inode* inode, struct file* file) {
     if(input_pins_file_opened == 1) {
@@ -94,7 +94,7 @@ static int __init input_pins_init(void) {
     for(i = 0; i < input_pins_init_length; ++i) {
         input_pins_ids[i] = INPUT_PINS_MAP(i);
         input_pins_values[i] = 0;
-        return_value = gpio_request(input_pins[i], "INPUT PIN");
+        return_value = gpio_request(input_pins[i], "INPUT_PIN");
         if(return_value) {
             printk(KERN_ERR "Unable to request GPIOs!\nCalling gpio_request returned %d\n", return_value);
             return return_value;
@@ -111,7 +111,7 @@ static int __init input_pins_init(void) {
             return input_pins_irqs[i];
         }
         printk(KERN_INFO "irq: %d\n", input_pins_irqs[i]);
-        return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERUPT, "input pins", (void*) (input_pins_ids + i));
+        return_value = request_irq(input_pins_irqs[i], &input_pins_interrupt, INPUT_PINS_INTERRUPT, "input_pins", (void*) (input_pins_ids + i));
         if(return_value) {
             printk(KERN_ERR "Unable to request INTERRUP\nCalling request_irq returned %d\n", return_value);
             return return_value;
