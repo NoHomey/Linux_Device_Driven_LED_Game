@@ -1,7 +1,7 @@
-#include <stdint.h>
-
 #ifndef _LIBTLC5947_H
 #define _LIBTLC5947_H
+
+#include <stdint.h>
 
 #define LIBTLC5947_DEVICE "/dev/tlc5947"
 #define LIBTLC5947_LEDS 24
