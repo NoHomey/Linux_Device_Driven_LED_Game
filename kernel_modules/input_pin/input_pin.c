@@ -7,7 +7,7 @@
 #include <linux/types.h>
 #include <asm/errno.h>
 
-#define IS_ERR(r) r > 0
+#define IS_ERR(r) r < 0
 #define PIN_DEBOUNCE 150
 #define INPUT_PIN_IRQ IRQF_TRIGGER_FALLING | IRQF_ONESHOT
 
