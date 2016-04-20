@@ -8,6 +8,8 @@
 #include <linux/stat.h>
 #include <linux/fs.h>
 #include <linux/cdev.h>
+#include <linux/slab.h>
+#include <asm/uaccess.h>
 #include <asm/errno.h>
 
 #define IS_ERR(r) r < 0
@@ -26,23 +28,28 @@ static struct cdev* cdev;
 static bool file_opened;
 
 static int input_pin_file_open(struct inode* inode, struct file* file) {
+    printk(KERN_INFO "Opened %d\n", file_opened);
     if(file_opened) {
         printk(KERN_ERR "Fail to open file /dev/input_pin\n");
         return -EBUSY;
-	}
-	file_opened = 1;
+    }
+    file_opened = 1;
 
     return 0;
 }
 
 static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset) {
+    char write_char9 = '9';
+    printk(KERN_INFO "READING %d\n", pin_value);
     if(!pin_value) {
         return 0;
     }
-    return_value = copy_to_user(buffer, (char *) &pin, 1);
+    return_value = copy_to_user(buffer, &write_char9, 1);
+    printk(KERN_INFO "pin %d, ret %d\n", pin_value, return_value);
     if(return_value > 0) {
         return -EIO;
     }
+    pin_value = 0;
 
     return pin_value;
 }
@@ -55,7 +62,7 @@ static int input_pin_file_close(struct inode* inode, struct file* file) {
 
 static irqreturn_t gpio_interrupt_handle(int irq, void* dev_id) {
 	pin_value = 1;
-	printk(KERN_ERR "irq %d handeled\n", irq);
+	printk(KERN_INFO "irq %d handeled\n", irq);
 	return IRQ_HANDLED;
 }
 
