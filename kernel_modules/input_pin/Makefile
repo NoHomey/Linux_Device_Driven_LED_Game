@@ -1,5 +1,7 @@
 obj-m := input_pin.o
 
+major = 243 
+
 all: clean
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
@@ -11,3 +13,10 @@ load:
 
 unload:
 	rmmod -f input_pin
+
+device:
+	mknod /dev/input_pin c $(major) 0
+	chmod 555 /dev/input_pin
+
+remove:
+	rm -f /dev/input_pin
