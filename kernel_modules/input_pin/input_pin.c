@@ -30,6 +30,7 @@ static dev_t device_numbers;
 static struct cdev* cdev;
 static bool file_opened;
 static spinlock_t value_lock;
+static unsigned long last_jiffies;
 
 static int input_pin_file_open(struct inode* inode, struct file* file) {
     printk(KERN_INFO "Opened %d\n", file_opened);
@@ -68,8 +69,9 @@ static int input_pin_file_close(struct inode* inode, struct file* file) {
 }
 
 static irqreturn_t gpio_interrupt_handle(int irq, void* dev_id) {
-    unsigned long flags;
-	if(time_after_eq(jiffies, jiffies + HZ / 7)) {
+	unsigned long flags;
+	if(time_after_eq(jiffies, last_jiffies + HZ / 3) || (!last_jiffies)) {
+		last_jiffies = jiffies;
 		spin_lock_irqsave(&value_lock, flags);
 		pin_value = 1;
 		printk(KERN_INFO "irq %d handeled\n", irq);
@@ -127,6 +129,7 @@ static int __init input_pin_init(void) {
 	file_opened = 0;
 	pin_value = 0;
         spin_lock_init(&value_lock);
+	last_jiffies = 0;
 
 	return 0;
 }
