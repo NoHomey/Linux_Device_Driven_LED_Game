@@ -11,9 +11,10 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 #include <asm/errno.h>
+#include <linux/spinlock.h>
 
 #define IS_ERR(r) r < 0
-#define PIN_DEBOUNCE 150
+#define PIN_DEBOUNCE 500
 #define INPUT_PIN_IRQ IRQF_TRIGGER_FALLING | IRQF_ONESHOT
 
 static int return_value;
@@ -27,6 +28,7 @@ static struct file_operations file_operations;
 static dev_t device_numbers;
 static struct cdev* cdev;
 static bool file_opened;
+static spinlock_t value_lock;
 
 static int input_pin_file_open(struct inode* inode, struct file* file) {
     printk(KERN_INFO "Opened %d\n", file_opened);
@@ -40,15 +42,20 @@ static int input_pin_file_open(struct inode* inode, struct file* file) {
 }
 
 static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset) {
+    unsigned long flags;
+    spin_lock_irqsave(&value_lock, flags);
     printk(KERN_INFO "READING %d\n", pin_value);
-	if(!pin_value) {
-		return 0;
-	}
-	pin_value = 0;
-	return_value = copy_to_user(buffer, (char *) &pin, 1);
+    if(!pin_value) {
+        spin_unlock_irqrestore(&value_lock, flags);
+        return 0;
+    }
+    pin_value = 0;
+    return_value = copy_to_user(buffer, (char *) &pin, 1);
     if(return_value > 0) {
+        spin_unlock_irqrestore(&value_lock, flags);
         return -EIO;
     }
+    spin_unlock_irqrestore(&value_lock, flags);
 
     return 1;
 }
@@ -60,8 +67,12 @@ static int input_pin_file_close(struct inode* inode, struct file* file) {
 }
 
 static irqreturn_t gpio_interrupt_handle(int irq, void* dev_id) {
+        unsigned long flags;
+        spin_lock_irqsave(&value_lock, flags);
 	pin_value = 1;
 	printk(KERN_INFO "irq %d handeled\n", irq);
+        spin_unlock_irqrestore(&value_lock, flags);
+
 	return IRQ_HANDLED;
 }
 
@@ -112,6 +123,7 @@ static int __init input_pin_init(void) {
 	}
 	file_opened = 0;
 	pin_value = 0;
+        spin_lock_init(&value_lock);
 
 	return 0;
 }

@@ -2,7 +2,7 @@ CONFIG_MODULE_SIG = n
 
 obj-m := input_pin.o
 
-major = 249
+major = 243
 
 all: clean
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

@@ -6,6 +6,7 @@
 
 int main(void) {
 	unsigned int read_length;
+	unsigned int i = 0;
 	const unsigned int length = 1;
 	char read_data[length];
 	int fd = open(DEVICE, O_RDONLY);
@@ -13,10 +14,12 @@ int main(void) {
 		printf("File %s not exist or is in use.\n", DEVICE);
 		return fd;
 	}
-    read_length = read(fd, read_data, length);
-    if(read_length > 0) {
-        printf("%s\n", read_data);
-    }
+	while(i < 100) {
+    		read_length = read(fd, read_data, length);
+    		if(read_length > 0) {
+        		printf("i %d pin %d\n", i++, read_data[0]);
+   		 }
+	}
 
 	return 0;
 }
