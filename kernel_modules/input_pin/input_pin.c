@@ -12,6 +12,7 @@
 #include <asm/uaccess.h>
 #include <asm/errno.h>
 #include <linux/spinlock.h>
+#include <linux/jiffies.h>
 
 #define IS_ERR(r) r < 0
 #define PIN_DEBOUNCE 500
@@ -44,7 +45,7 @@ static int input_pin_file_open(struct inode* inode, struct file* file) {
 static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset) {
     unsigned long flags;
     spin_lock_irqsave(&value_lock, flags);
-    printk(KERN_INFO "READING %d\n", pin_value);
+    //printk(KERN_INFO "READING %d\n", pin_value);
     if(!pin_value) {
         spin_unlock_irqrestore(&value_lock, flags);
         return 0;
@@ -67,11 +68,13 @@ static int input_pin_file_close(struct inode* inode, struct file* file) {
 }
 
 static irqreturn_t gpio_interrupt_handle(int irq, void* dev_id) {
-        unsigned long flags;
-        spin_lock_irqsave(&value_lock, flags);
-	pin_value = 1;
-	printk(KERN_INFO "irq %d handeled\n", irq);
-        spin_unlock_irqrestore(&value_lock, flags);
+    unsigned long flags;
+	if(time_after_eq(jiffies, jiffies + HZ / 7)) {
+		spin_lock_irqsave(&value_lock, flags);
+		pin_value = 1;
+		printk(KERN_INFO "irq %d handeled\n", irq);
+		spin_unlock_irqrestore(&value_lock, flags);
+	}
 
 	return IRQ_HANDLED;
 }
