@@ -1,6 +1,8 @@
+CONFIG_MODULE_SIG = n
+
 obj-m := input_pin.o
 
-major = 243 
+major = 249
 
 all: clean
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
@@ -20,3 +22,8 @@ device:
 
 remove:
 	rm -f /dev/input_pin
+
+test:
+	gcc test.c -Wall -o test
+	./test
+	rm ./test

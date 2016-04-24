@@ -19,9 +19,10 @@
 static int return_value;
 static u_int8_t pin = 27;
 static int irq_number = 0;
-static bool pin_value = 0;
-static u_int8_t device_major_number;
-static u_int8_t device_first_minor_number = 0;
+static volatile bool pin_value = 0;
+static int device_major_number;
+static const unsigned device_base_number = 0;
+static const unsigned device_minor_count = 1;
 static struct file_operations file_operations;
 static dev_t device_numbers;
 static struct cdev* cdev;
@@ -39,19 +40,17 @@ static int input_pin_file_open(struct inode* inode, struct file* file) {
 }
 
 static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset) {
-    char write_char9 = '9';
     printk(KERN_INFO "READING %d\n", pin_value);
-    if(!pin_value) {
-        return 0;
-    }
-    return_value = copy_to_user(buffer, &write_char9, 1);
-    printk(KERN_INFO "pin %d, ret %d\n", pin_value, return_value);
+	if(!pin_value) {
+		return 0;
+	}
+	pin_value = 0;
+	return_value = copy_to_user(buffer, (char *) &pin, 1);
     if(return_value > 0) {
         return -EIO;
     }
-    pin_value = 0;
 
-    return pin_value;
+    return 1;
 }
 
 static int input_pin_file_close(struct inode* inode, struct file* file) {
@@ -90,15 +89,15 @@ static int __init input_pin_init(void) {
 		gpio_free(pin);
 		return return_value;
 	}
-	return_value = alloc_chrdev_region(&device_numbers, device_first_minor_number, device_first_minor_number + 1, "input_pins");
-	if(return_value) {
+	return_value = alloc_chrdev_region(&device_numbers, device_base_number, device_minor_count, "input_pin");
+	if(IS_ERR(return_value)) {
        printk(KERN_ERR "Could not allocate device numbers\nCalling alloc_chrdev_region returned %d\n", return_value);
 	   free_irq(irq_number, NULL);
 	   gpio_free(pin);
        return return_value;
     }
 	device_major_number = MAJOR(device_numbers);
-	printk(KERN_INFO "Device major number is %d. Use $ sudo make device major=%d\n", device_major_number, device_major_number);
+	printk(KERN_INFO "Device major number is %d.\n", device_major_number);
 	cdev = cdev_alloc();
 	cdev->owner = THIS_MODULE;
 	file_operations.owner = THIS_MODULE;
@@ -106,8 +105,8 @@ static int __init input_pin_init(void) {
 	file_operations.release = input_pin_file_close;
 	file_operations.read = input_pin_file_read;
 	cdev->ops = &file_operations;
-	return_value = cdev_add(cdev, device_numbers, device_first_minor_number + 1);
-	if(return_value) {
+	return_value = cdev_add(cdev, device_numbers, device_minor_count);
+	if(IS_ERR(return_value)) {
 		printk(KERN_ERR "Failed to add device numbers to struct cdev\nCalling cdev_add returned %d\n", return_value);
 		return return_value;
 	}
@@ -118,6 +117,8 @@ static int __init input_pin_init(void) {
 }
 
 static void __exit input_pin_exit(void) {
+	unregister_chrdev_region(device_numbers, device_minor_count);
+	cdev_del(cdev);
 	free_irq(irq_number, NULL);
 	gpio_free(pin);
 }
