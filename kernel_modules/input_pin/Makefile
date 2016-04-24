@@ -1,8 +1,10 @@
-CONFIG_MODULE_SIG = n
+CONFIG_MODULE_SIG=n
 
-obj-m := input_pin.o
+obj-m:=input_pin.o
 
-major = 243
+major=243
+
+input_pin=27
 
 all: clean
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
@@ -11,7 +13,7 @@ clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
 
 load:
-	insmod input_pin.ko
+	insmod input_pin.ko input_pin=$(input_pin)
 
 unload:
 	rmmod -f input_pin
