@@ -136,7 +136,7 @@ void board_move(struct board* board, enum direction direction) {
 	}
 }
 
-int board_write(struct board* board, struct tlc5947* tlc5947) {
+void board_set(struct board* board, struct tlc5947* tlc5947) {
 	uint8_t k, value;
 	uint16_t rgb, pwm[3];
 	int8_t x, y;
@@ -144,8 +144,8 @@ int board_write(struct board* board, struct tlc5947* tlc5947) {
 		for(y = BOARD_MIN; y <= BOARD_MAX; ++y) {
 			rgb = (x + board->x) * tlc5947->chips + (y + board->y);
 			value = _board_get(board, x, y);
-			k = (value <= 7) ? 0 : (value <= 2 * 7) ? 1 : 3;
-			switch(value - (k * 7)) {
+			k = (value <= BOARD_COMBINATION) ? 0 : (value <= 2 * BOARD_COMBINATION) ? 1 : 3;
+			switch(value - (k * BOARD_COMBINATION)) {
 				case 0: {
 					pwm[0] = 0;
 					pwm[1] = 0;
@@ -164,9 +164,38 @@ int board_write(struct board* board, struct tlc5947* tlc5947) {
 					pwm[2] = 0;
 					break;
 				}
+				case 3: {
+					pwm[0] = 0;
+					pwm[1] = 0;
+					pwm[2] = 1000 * (k + 1);
+					break;
+				}
+				case 4: {
+					pwm[0] = 1000 * (k + 1);
+					pwm[1] = 1000 * (k + 1);
+					pwm[2] = 0;
+					break;
+				}
+				case 5: {
+					pwm[0] = 0;
+					pwm[1] = 1000 * (k + 1);
+					pwm[2] = 1000 * (k + 1);
+					break;
+				}
+				case 6: {
+					pwm[0] = 1000 * (k + 1);
+					pwm[1] = 0;
+					pwm[2] = 1000 * (k + 1);
+					break;
+				}
+				case 7: {
+					pwm[0] = 1000 * (k + 1);
+					pwm[1] = 1000 * (k + 1);
+					pwm[2] = 1000 * (k + 1);
+					break;
+				}
 			}
 			tlc5947_setRGBLED(tlc5947, rgb, pwm);
 		}
 	}
-	return tlc5947_write(tlc5947);
 }

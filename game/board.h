@@ -10,6 +10,7 @@
 #define BOARD_INIT_VALUE 1
 #define BOARD_MAX_VALUE 21
 #define BOARD_SIZE BOARD_ROW * BOARD_ROW
+#define BOARD_COMBINATION 7
 #define BOARD_VALID(d) ((d >= BOARD_MIN) && (d <= BOARD_MAX))
 #define BOARD_CONVERT(x, y) BOARD_ROW * x + y
 
@@ -32,15 +33,6 @@ enum direction {
 	up,
 	down
 };
-/*
-	{0, 0, 1000},
-	{0, 1000, 0},
-	{1000, 0, 0},
-	{0, 1000, 1000},
-	{1000, 1000, 0},
-	{1000, 0, 1000},
-	{1000, 1000, 1000},
-*/
 
 void _board_set(struct board* board, uint8_t x, uint8_t y, uint8_t val);
 uint8_t _board_get(struct board* board, uint8_t x, uint8_t y);
@@ -53,6 +45,6 @@ void _board_move_down(struct board* board);
 
 void board_init(struct board* board, uint8_t x, uint8_t y);
 void board_move(struct board* board, enum direction direction);
-int board_write(struct board* board, struct tlc5947* tlc5947);
+void board_set(struct board* board, struct tlc5947* tlc5947);
 
 #endif
