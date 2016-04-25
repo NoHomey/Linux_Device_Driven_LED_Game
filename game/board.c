@@ -171,20 +171,20 @@ void board_set(struct board* board, struct tlc5947* tlc5947) {
 				}
 				case 4: {
 					pwm[0] = 0;
-					pwm[1] = 4095;
-					pwm[2] = 4095;
+					pwm[1] = 2047;
+					pwm[2] = 2047;
 					break;
 				}
 				case 5: {
-					pwm[0] = 4095;
-					pwm[1] = 4095;
+					pwm[0] = 2047;
+					pwm[1] = 2047;
 					pwm[2] = 0;
 					break;
 				}
 				case 6: {
-					pwm[0] = 4095;
+					pwm[0] = 2047;
 					pwm[1] = 0;
-					pwm[2] = 4095;
+					pwm[2] = 2047;
 					break;
 				}
 				case 7: {
