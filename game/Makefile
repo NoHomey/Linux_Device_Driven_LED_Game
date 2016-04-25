@@ -1,9 +1,8 @@
-all: clean board.o ltlc5947
-	#cd ../kernel_modules/tlc5947 && make remove all load device
+all: clean libtlc5947 board.o
 	gcc board.o game.c -Wall -Werror -ltlc5947 -o game
 	./game
 
-ltlc5947:
+libtlc5947:
 	cd ../lib/tlc5947 && make
 
 board.o:
