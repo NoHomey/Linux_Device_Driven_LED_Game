@@ -137,15 +137,14 @@ void board_move(struct board* board, enum direction direction) {
 }
 
 void board_set(struct board* board, struct tlc5947* tlc5947) {
-	uint8_t k, value;
+	uint8_t value;
 	uint16_t rgb, pwm[3];
 	int8_t x, y;
 	for(x = BOARD_MIN; x <= BOARD_MAX; ++x) {
 		for(y = BOARD_MIN; y <= BOARD_MAX; ++y) {
-			rgb = (x + board->x) * tlc5947->chips + (y + board->y);
 			value = _board_get(board, x, y);
-			k = (value <= BOARD_COMBINATION) ? 0 : (value <= 2 * BOARD_COMBINATION) ? 1 : 3;
-			switch(value - (k * BOARD_COMBINATION)) {
+			rgb = (x + board->x) * tlc5947->chips + (y + board->y);
+			switch(value) {
 				case 0: {
 					pwm[0] = 0;
 					pwm[1] = 0;
@@ -153,45 +152,129 @@ void board_set(struct board* board, struct tlc5947* tlc5947) {
 					break;
 				}
 				case 1: {
-					pwm[0] = 1000 * (k + 1);
-					pwm[1] = 0;
-					pwm[2] = 0;
+					pwm[0] = 40;
+					pwm[1] = 1884;
+					pwm[2] = 4055;
 					break;
 				}
 				case 2: {
-					pwm[0] = 0;
-					pwm[1] = 1000 * (k + 1);
-					pwm[2] = 0;
+					pwm[0] = 1228;
+					pwm[1] = 1802;
+					pwm[2] = 1597;
 					break;
 				}
 				case 3: {
-					pwm[0] = 0;
-					pwm[1] = 0;
-					pwm[2] = 1000 * (k + 1);
+					pwm[0] = 1802;
+					pwm[1] = 2375;
+					pwm[2] = 3522;
 					break;
 				}
 				case 4: {
-					pwm[0] = 1000 * (k + 1);
-					pwm[1] = 1000 * (k + 1);
-					pwm[2] = 0;
+					pwm[0] = 1925;
+					pwm[1] = 2416;
+					pwm[2] = 1024;
 					break;
 				}
 				case 5: {
-					pwm[0] = 0;
-					pwm[1] = 1000 * (k + 1);
-					pwm[2] = 1000 * (k + 1);
+					pwm[0] = 1884;
+					pwm[1] = 1638;
+					pwm[2] = 3809;
 					break;
 				}
 				case 6: {
-					pwm[0] = 1000 * (k + 1);
-					pwm[1] = 0;
-					pwm[2] = 1000 * (k + 1);
+					pwm[0] = 2047;
+					pwm[1] = 4095;
+					pwm[2] = 3399;
 					break;
 				}
 				case 7: {
-					pwm[0] = 1000 * (k + 1);
-					pwm[1] = 1000 * (k + 1);
-					pwm[2] = 1000 * (k + 1);
+					pwm[0] = 2088;
+					pwm[1] = 3932;
+					pwm[2] = 696;
+					break;
+				}
+				case 8: {
+					pwm[0] = 2252;
+					pwm[1] = 1105;
+					pwm[2] = 286;
+					break;
+				}
+				case 9: {
+					pwm[0] = 2252;
+					pwm[1] = 3809;
+					pwm[2] = 3809;
+					break;
+				}
+				case 10: {
+					pwm[0] = 2239;
+					pwm[1] = 2239;
+					pwm[2] = 3031;
+					break;
+				}
+				case 11: {
+					pwm[0] = 2416;
+					pwm[1] = 3276;
+					pwm[2] = 3276;
+					break;
+				}
+				case 12: {
+					pwm[0] = 2457;
+					pwm[1] = 0;
+					pwm[2] = 2457;
+					break;
+				}
+				case 13: {
+					pwm[0] = 2539;
+					pwm[1] = 2539;
+					pwm[2] = 1515;
+					break;
+				}
+				case 14: {
+					pwm[0] = 3440;
+					pwm[1] = 1802;
+					pwm[2] = 1556;
+					break;
+				}
+				case 15: {
+					pwm[0] = 3983;
+					pwm[1] = 3522;
+					pwm[2] = 204;
+					break;
+				}
+				case 16: {
+					pwm[0] = 4095;
+					pwm[1] = 0;
+					pwm[2] = 2744;
+					break;
+				}
+				case 17: {
+					pwm[0] = 4095;
+					pwm[1] = 1024;
+					pwm[2] = 1024;
+					break;
+				}
+				case 18: {
+					pwm[0] = 4095;
+					pwm[1] = 2826;
+					pwm[2] = 245;
+					break;
+				}
+				case 19: {
+					pwm[0] = 4095;
+					pwm[1] = 2848;
+					pwm[2] = 3276;
+					break;
+				}
+				case 20: {
+					pwm[0] = 4095;
+					pwm[1] = 3727;
+					pwm[2] = 2990;
+					break;
+				}
+				case 21: {
+					pwm[0] = 4095;
+					pwm[1] = 4095;
+					pwm[2] = 4095;
 					break;
 				}
 			}

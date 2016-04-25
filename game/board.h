@@ -10,7 +10,6 @@
 #define BOARD_INIT_VALUE 1
 #define BOARD_MAX_VALUE 21
 #define BOARD_SIZE BOARD_ROW * BOARD_ROW
-#define BOARD_COMBINATION 7
 #define BOARD_VALID(d) ((d >= BOARD_MIN) && (d <= BOARD_MAX))
 #define BOARD_CONVERT(x, y) BOARD_ROW * x + y
 
