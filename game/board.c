@@ -145,136 +145,94 @@ void board_set(struct board* board, struct tlc5947* tlc5947) {
 			value = _board_get(board, x, y);
 			rgb = (x + board->x) * tlc5947->chips + (y + board->y);
 			switch(value) {
-				case 0: {
+				case 0: { //BLACK
 					pwm[0] = 0;
 					pwm[1] = 0;
 					pwm[2] = 0;
 					break;
 				}
-				case 1: {
-					pwm[0] = 40;
-					pwm[1] = 1884;
-					pwm[2] = 4055;
-					break;
-				}
-				case 2: {
-					pwm[0] = 1228;
-					pwm[1] = 1802;
-					pwm[2] = 1597;
-					break;
-				}
-				case 3: {
-					pwm[0] = 1802;
-					pwm[1] = 2375;
-					pwm[2] = 3522;
-					break;
-				}
-				case 4: {
-					pwm[0] = 1925;
-					pwm[1] = 2416;
-					pwm[2] = 1024;
-					break;
-				}
-				case 5: {
-					pwm[0] = 1884;
-					pwm[1] = 1638;
-					pwm[2] = 3809;
-					break;
-				}
-				case 6: {
+				case 1: { //GRAY
 					pwm[0] = 2047;
-					pwm[1] = 4095;
-					pwm[2] = 3399;
+					pwm[1] = 2047;
+					pwm[2] = 2047;
 					break;
 				}
-				case 7: {
-					pwm[0] = 2088;
-					pwm[1] = 3932;
-					pwm[2] = 696;
-					break;
-				}
-				case 8: {
-					pwm[0] = 2252;
-					pwm[1] = 1105;
-					pwm[2] = 286;
-					break;
-				}
-				case 9: {
-					pwm[0] = 2252;
-					pwm[1] = 3809;
-					pwm[2] = 3809;
-					break;
-				}
-				case 10: {
-					pwm[0] = 2239;
-					pwm[1] = 2239;
-					pwm[2] = 3031;
-					break;
-				}
-				case 11: {
-					pwm[0] = 2416;
-					pwm[1] = 3276;
-					pwm[2] = 3276;
-					break;
-				}
-				case 12: {
-					pwm[0] = 2457;
-					pwm[1] = 0;
-					pwm[2] = 2457;
-					break;
-				}
-				case 13: {
-					pwm[0] = 2539;
-					pwm[1] = 2539;
-					pwm[2] = 1515;
-					break;
-				}
-				case 14: {
-					pwm[0] = 3440;
-					pwm[1] = 1802;
-					pwm[2] = 1556;
-					break;
-				}
-				case 15: {
-					pwm[0] = 3983;
-					pwm[1] = 3522;
-					pwm[2] = 204;
-					break;
-				}
-				case 16: {
-					pwm[0] = 4095;
-					pwm[1] = 0;
-					pwm[2] = 2744;
-					break;
-				}
-				case 17: {
-					pwm[0] = 4095;
-					pwm[1] = 1024;
-					pwm[2] = 1024;
-					break;
-				}
-				case 18: {
-					pwm[0] = 4095;
-					pwm[1] = 2826;
-					pwm[2] = 245;
-					break;
-				}
-				case 19: {
-					pwm[0] = 4095;
-					pwm[1] = 2848;
-					pwm[2] = 3276;
-					break;
-				}
-				case 20: {
-					pwm[0] = 4095;
-					pwm[1] = 3727;
-					pwm[2] = 2990;
-					break;
-				}
-				case 21: {
+				case 2: { //WHITE
 					pwm[0] = 4095;
 					pwm[1] = 4095;
 					pwm[2] = 4095;
+					break;
+				}
+				case 3: { //BROWN
+					pwm[0] = 2661;
+					pwm[1] = 655;
+					pwm[2] = 655;
+					break;
+				}
+				case 4: { //PINK
+					pwm[0] = 4095;
+					pwm[1] = 3072;
+					pwm[2] = 3235;
+					break;
+				}
+				case 5: { //CYAN
+					pwm[0] = 0;
+					pwm[1] = 4095;
+					pwm[2] = 4095;
+					break;
+				}
+				case 6: { //MAGENTA
+					pwm[0] = 4095;
+					pwm[1] = 0;
+					pwm[2] = 4095;
+					break;
+				}
+				case 7: { //PURPLE
+					pwm[0] = 1024;
+					pwm[1] = 0;
+					pwm[2] = 1024;
+					break;
+				}
+				case 8: { //VIOLET
+					pwm[0] = 2293;
+					pwm[1] = 0;
+					pwm[2] = 4095;
+					break;
+				}
+				case 9: { //CINDIGO
+					pwm[0] = 1187;
+					pwm[1] = 0;
+					pwm[2] = 1024;
+					break;
+				}
+				case 10: { //BLUE
+					pwm[0] = 0;
+					pwm[1] = 0;
+					pwm[2] = 4095;
+					break;
+				}
+				case 11: { //GREEN
+					pwm[0] = 0;
+					pwm[1] = 4095;
+					pwm[2] = 0;
+					break;
+				}
+				case 12: { //YELLOW
+					pwm[0] = 4095;
+					pwm[1] = 4095;
+					pwm[2] = 0;
+					break;
+				}
+				case 13: { //ORANGE
+					pwm[0] = 4095;
+					pwm[1] = 1023;
+					pwm[2] = 0;
+					break;
+				}
+				case 14: { //RED
+					pwm[0] = 4095;
+					pwm[1] = 0;
+					pwm[2] = 0;
 					break;
 				}
 			}
