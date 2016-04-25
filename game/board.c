@@ -1,14 +1,13 @@
 #include "board.h"
 #include <stdlib.h>
-#include <stdio.h>
 
-void _board_set(struct board* board, uint8_t x, uint8_t y, uint16_t val) {
+void _board_set(struct board* board, uint8_t x, uint8_t y, uint8_t val) {
 	if(BOARD_VALID(x) && BOARD_VALID(y)) {
 		board->board[BOARD_CONVERT(x, y)] = val;
 	}
 }
 
-uint16_t _board_get(struct board* board, uint8_t x, uint8_t y) {
+uint8_t _board_get(struct board* board, uint8_t x, uint8_t y) {
 	if(BOARD_VALID(x) && BOARD_VALID(y)) {
 		return board->board[BOARD_CONVERT(x, y)];
 	}
@@ -34,8 +33,7 @@ uint8_t _board_new(struct board* board) {
 }
 
 void _board_move_single(struct board* board, int8_t x, int8_t y, int8_t direction_x, int8_t direction_y) {
-	int8_t next_x, next_y, change;
-	uint16_t value, next_value;
+	int8_t next_x, next_y, change, value, next_value;
 	while(BOARD_VALID(x) && BOARD_VALID(y)) {
 		next_x = x + direction_x;
 		next_y = y + direction_y;
@@ -47,12 +45,12 @@ void _board_move_single(struct board* board, int8_t x, int8_t y, int8_t directio
 		change = 0;
 		if(value) {
 			if(next_value == 0) {
-				change = 1;
-			} else if(next_value == value) {
 				change = BOARD_INIT_VALUE;
+			} else if(next_value == value) {
+				change = 2 * BOARD_INIT_VALUE;
 			}
 			if(change) {
-				_board_set(board, next_x, next_y, value * change);
+				_board_set(board, next_x, next_y, value + change - BOARD_INIT_VALUE);
 				_board_set(board, x, y, 0);
 				if((value * change) == BOARD_MAX_VALUE) {
 					board->state = win;
@@ -136,4 +134,39 @@ void board_move(struct board* board, enum direction direction) {
 			board->state = lose;
 		}
 	}
+}
+
+int board_write(struct board* board, struct tlc5947* tlc5947) {
+	uint8_t k, value;
+	uint16_t rgb, pwm[3];
+	int8_t x, y;
+	for(x = BOARD_MIN; x <= BOARD_MAX; ++x) {
+		for(y = BOARD_MIN; y <= BOARD_MAX; ++y) {
+			rgb = (x + board->x) * tlc5947->chips + (y + board->y);
+			value = _board_get(board, x, y);
+			k = (value <= 7) ? 0 : (value <= 2 * 7) ? 1 : 3;
+			switch(value - (k * 7)) {
+				case 0: {
+					pwm[0] = 0;
+					pwm[1] = 0;
+					pwm[2] = 0;
+					break;
+				}
+				case 1: {
+					pwm[0] = 1000 * (k + 1);
+					pwm[1] = 0;
+					pwm[2] = 0;
+					break;
+				}
+				case 2: {
+					pwm[0] = 0;
+					pwm[1] = 1000 * (k + 1);
+					pwm[2] = 0;
+					break;
+				}
+			}
+			tlc5947_setRGBLED(tlc5947, rgb, pwm);
+		}
+	}
+	return tlc5947_write(tlc5947);
 }
