@@ -1,7 +1,7 @@
 read:
 	rm -f ./read ./read.txt
 	gcc ./read.c -lwiringPi -Wall -Werror -o read
-	./read > ./read.txt
+	./read
 
 write:
 	rm -f ./write
