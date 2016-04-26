@@ -1,48 +1,33 @@
-#include <wiringPi.h>
-#include <wiringSerial.h>
+#include <comio/comi.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <errno.h>
 
 int main(void) {
-	if(wiringPiSetupGpio() == -1) {
-                perror("error while seting up wiringPi\n");
-                return 1;
-        }
-        printf("wringPi setup\n"); 
-	int fd = serialOpen("/dev/ttyAMA0", 115200);
-	int number, c;
-	int i, count = 0;
+	uint8_t byte;
+	int number;
+	int count = 0;
+	int fd = comi_open();
 	if(fd < 0) {
 		perror("error while opening serial\n");
 		return 1;
 	}
 	printf("serial opened\n");
-	serialFlush(fd);
+	comi_flush(fd);
 	printf("serial flushed\n");
 	while(1) {
-		number = serialDataAvail(fd);
+		number = comi_do(fd, &byte);
 		if(number == -1) {
-			perror("error while counting avalible chars\n");
+			perror("error while reading\n");
 			return 1;
+		} else if(number) {
+			printf("%d %d", count++, byte);
 		}
-		if(number == 0) {
-			continue;
-		}
-		for(i = 0; i < number; ++i) {
-			c = serialGetchar(fd);
-			if(c == -1) {
-				perror("error while reading char from serial\n");
-				return 1;
-			}
-			printf("%d %d\n", count++, c);
-			if(count == 10) {
-				goto end_it;
-			}
+		if(count == 10) {
+			break;
 		}
 	}
-	end_it:
-	serialPutchar(fd, 's');
-	serialClose(fd);
+	close(fd);
 
 	return 0;
 }
