@@ -21,9 +21,9 @@ int main(void) {
 			perror("error while reading\n");
 			return 1;
 		} else if(number) {
-			printf("%d %d", count++, byte);
+			printf("%d %d\n", count++, byte);
 		}
-		if(count == 10) {
+		if(count == 3000) {
 			break;
 		}
 	}
