@@ -4,18 +4,22 @@
 #include <errno.h>
 
 int main(void) {
-	int fd = serialOpen("/dev/ttyAMA0", 9600);
+	if(wiringPiSetupGpio() == -1) {
+                perror("error while seting up wiringPi\n");
+                return 1;
+        }
+        printf("wringPi setup\n"); 
+	int fd = serialOpen("/dev/ttyAMA0", 115200);
 	int number, c;
-	int count = 0;
+	int i, count = 0;
 	if(fd < 0) {
 		perror("error while opening serial\n");
 		return 1;
 	}
-	if(wiringPiSetupGpio() == -1) {
-		perror("error while seting up wiringPi\n");
-		return 1;
-	}
-	while(count < 10) {
+	printf("serial opened\n");
+	serialFlush(fd);
+	printf("serial flushed\n");
+	while(1) {
 		number = serialDataAvail(fd);
 		if(number == -1) {
 			perror("error while counting avalible chars\n");
@@ -31,8 +35,13 @@ int main(void) {
 				return 1;
 			}
 			printf("%d %d\n", count++, c);
+			if(count == 10) {
+				goto end_it;
+			}
 		}
 	}
+	end_it:
+	serialPutchar(fd, 's');
 	serialClose(fd);
 
 	return 0;
