@@ -42,6 +42,34 @@ static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const
     return buffer_length;
 }
 
+long tlc5947_ioctl(struct file * file, unsigned int cmd, unsigned long arg) {
+	if(_IOC_TYPE(cmd) != INPUT_PIN_MAGIC_NUMBER) {
+		printk("ioctl magic number isn't device driver's one.\ncmd equals %d\n", cmd);
+		return -ENOTTY;
+	}
+	if(_IOC_NR(cmd) > INPUT_PIN_MAX_NUMBER) {
+		printk("ioctl command exceeds last implemented command.\ncmd equals %d\n", cmd);
+		return -ENOTTY;
+	}
+	switch(cmd) {
+		case INPUT_PIN_AWAIT: {
+			u_int8_t i;
+			unsigned long flags;
+			for(i = 0; i < input_pin_init_length; ++i) {
+				spin_lock_irqsave(value_lock + i, flags);
+				if(pin_value[i]) {
+					spin_unlock_irqrestore(value_lock + i, flags);
+					return 1;
+				}
+				spin_unlock_irqrestore(value_lock + i, flags);
+			}
+			return 0;
+		}
+	}
+
+	return 0;
+}
+
 static irqreturn_t gpio_interrupt_handle(int irq, void* dev_id) {
 	unsigned long flags;
 	u_int8_t i;
@@ -143,6 +171,7 @@ static int __init input_pin_init(void) {
 	file_operations.open = input_pin_file_open;
 	file_operations.release = input_pin_file_close;
 	file_operations.read = input_pin_file_read;
+	file_operations.unlocked_ioctl = input_pin_ioctl;
 	cdev->ops = &file_operations;
 	return_value = cdev_add(cdev, device_numbers, device_minor_count);
 	if(IS_ERR(return_value)) {

@@ -29,3 +29,8 @@ test:
 	gcc test.c -Wall -o test
 	./test
 	rm ./test
+
+header:
+	rm -f /usr/include/input_pin.h
+	cp input_pin.h /usr/include
+	chmod 555 /usr/include/input_pin.h

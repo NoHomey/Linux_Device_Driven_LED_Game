@@ -1,6 +1,8 @@
 #ifndef _INPUT_PIN_H
 #define _INPUT_PIN_H
 
+#ifdef __KERNEL__
+
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/moduleparam.h>
@@ -17,11 +19,12 @@
 #include <asm/errno.h>
 #include <linux/spinlock.h>
 #include <linux/jiffies.h>
+#include <linux/ioctl.h>
 
 #define IS_ERR(r) r < 0
 #define INPUT_PIN_MAX_COUNT 26
 #define INPUT_PIN_IRQ IRQF_TRIGGER_FALLING | IRQF_ONESHOT
-#define INPUT_PIN_IRQ_TIMEOUT HZ / 3
+#define INPUT_PIN_IRQ_TIMEOUT HZ / 3 - 50
 #define INPUT_PIN_NAME "input_pin"
 #define CONST_PARAM S_IRUSR | S_IRGRP | S_IROTH
 
@@ -49,8 +52,19 @@ static u_int8_t free_state;
 static int input_pin_file_open(struct inode* inode, struct file* file);
 static int input_pin_file_close(struct inode* inode, struct file* file);
 static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const size_t length, loff_t* offset);
+long input_pin_ioctl(struct file * file, unsigned int cmd, unsigned long arg);
 static irqreturn_t gpio_interrupt_handle(int irq, void* dev_id);
 static int __init input_pin_init(void);
 static void input_pin_exit(void);
+
+#else
+
+#include <sys/ioctl.h>
+
+#endif
+
+#define INPUT_PIN_MAGIC_NUMBER '?'
+#define INPUT_PIN_AWAIT _IO(INPUT_PIN_MAGIC_NUMBER, 0)
+#define INPUT_PIN_MAX_NUMBER 0
 
 #endif
