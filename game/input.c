@@ -10,6 +10,7 @@
 int main(void) {
 	unsigned int read_length;
 	unsigned int j;
+	uint8_t byte;
 	const unsigned int length = 16;
 	char read_data[length];
 	int input = open(DEVICE, O_RDONLY);
@@ -25,9 +26,11 @@ int main(void) {
 	como_flush(fd);
 	while(1) {
     		if(ioctl(fd, INPUT_PIN_AWAIT)) {
-				read_length = read(fd, read_data, length);
+				read_length = read(input, read_data, length);
 				for(j = 0; j < read_length; ++j) {
-					como_do(fd, read_data + j);
+					byte = read_data[j];
+					printf("%d\n", byte);
+					como_do(fd, &byte);
 				}
    		 }
 	}
