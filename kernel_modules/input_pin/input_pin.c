@@ -42,7 +42,7 @@ static ssize_t input_pin_file_read(struct file* file, char __user* buffer, const
     return buffer_length;
 }
 
-long tlc5947_ioctl(struct file * file, unsigned int cmd, unsigned long arg) {
+long input_pin_ioctl(struct file * file, unsigned int cmd, unsigned long arg) {
 	if(_IOC_TYPE(cmd) != INPUT_PIN_MAGIC_NUMBER) {
 		printk("ioctl magic number isn't device driver's one.\ncmd equals %d\n", cmd);
 		return -ENOTTY;
