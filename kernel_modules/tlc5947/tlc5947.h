@@ -1,6 +1,8 @@
 #ifndef _TLC5947_H
 #define _TLC5947_H
 
+#ifdef __KERNEL__
+
 #include <linux/gpio.h>
 #include <linux/types.h>
 #include <linux/stat.h>
@@ -13,10 +15,6 @@
 #define GPIO_LOW 0
 #define TLC5947_NAME "tlc5947"
 #define CONST_PARAM S_IRUSR | S_IRGRP | S_IROTH
-#define TLC5947_MAGIC_NUMBER '~'
-#define TLC5947_ALLOC _IOW(TLC5947_MAGIC_NUMBER, 0, unsigned long)
-#define TLC5947_FREE _IO(TLC5947_MAGIC_NUMBER, 1)
-#define TLC5947_MAX_NUMBER 1
 
 ushort tlc5947_data = 255;
 ushort tlc5947_clock = 255;
@@ -44,5 +42,16 @@ static int tlc5947_file_close(struct inode* inode, struct file* file);
 long tlc5947_ioctl(struct file * file, unsigned int cmd, unsigned long arg);
 static int __init tlc5947_init(void);
 static void tlc5947_exit(void);
+
+#else
+
+#include <sys/ioctl.h>
+
+#endif
+
+#define TLC5947_MAGIC_NUMBER '~'
+#define TLC5947_ALLOC _IOW(TLC5947_MAGIC_NUMBER, 0, unsigned long)
+#define TLC5947_FREE _IO(TLC5947_MAGIC_NUMBER, 1)
+#define TLC5947_MAX_NUMBER 1
 
 #endif

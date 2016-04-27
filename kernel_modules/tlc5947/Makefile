@@ -23,3 +23,8 @@ device:
 
 remove:
 	rm -f /dev/tlc5947
+
+header:
+	rm -f /usr/include/tlc5947_ioctl.h
+	cp tlc5947.h /usr/include/tlc5947_ioctl.h
+	chmod 555 /usr/include/tlc5947_ioctl.h

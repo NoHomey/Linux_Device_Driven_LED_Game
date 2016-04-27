@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
+#include <sys/ioctl.h>
+#include <tlc5947_ioctl.h>
 
 int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips, const uint8_t wiring) {
     tlc5947->chips = chips;
@@ -18,6 +20,9 @@ int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips, const uint8_t wir
         return -ENOMEM;
     }
     tlc5947->buffer = (unsigned char*) calloc(tlc5947->length, sizeof(unsigned char));
+	if(ioctl(tlc5947->fd, TLC5947_ALLOC, tlc5947->length) == -1) {
+		return -ENOMEM;
+	}
     if(!tlc5947->buffer) {
         return -ENOMEM;
     }
@@ -31,6 +36,7 @@ int tlc5947_init(struct tlc5947* tlc5947, const uint8_t chips, const uint8_t wir
 void tlc5947_free(struct tlc5947* tlc5947) {
     free(tlc5947->buffer);
     free(tlc5947->pwm);
+	ioctl(tlc5947->fd, TLC5947_FREE);
     close(tlc5947->fd);
 }
 
