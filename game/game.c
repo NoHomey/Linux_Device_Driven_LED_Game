@@ -2,6 +2,7 @@
 #include "board.h"
 #include <stdio.h>
 #include <errno.h>
+#include <unistd.h>
 #include <comio/comi.h>
 
 int main(void) {
@@ -120,7 +121,7 @@ int main(void) {
 		}
 	}
 	tlc5947_free(&tlc5947);
-	closo(fd);
+	close(fd);
 
     return 0;
 }
