@@ -75,7 +75,7 @@ void _board_move_left(struct board* board) {
 void _board_move_right(struct board* board) {
 	int8_t x, y;
 	for(y = BOARD_MIN; y <= BOARD_MAX; ++y) {
-		for(x = BOARD_MAX; x >= BOARD_MIN; --x) {
+		for(x = BOARD_MAX - 1; x >= BOARD_MIN; --x) {
 			_board_move_single(board, x, y, 1, 0);
 		}
 	}
