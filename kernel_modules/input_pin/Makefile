@@ -4,7 +4,7 @@ obj-m:=input_pin.o
 
 major=243
 
-input_pin=27
+input_pin=6,13,19,26,17,27,22,5,18,23,24,25,12,16,20,21
 
 all: clean
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules

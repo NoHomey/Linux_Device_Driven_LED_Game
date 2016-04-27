@@ -14,7 +14,7 @@ int main(void) {
 		printf("File %s not exist or is in use.\n", DEVICE);
 		return fd;
 	}
-	while(i < 10) {
+	while(i < 20) {
     		read_length = read(fd, read_data, length);
     		if(read_length > 0) {
         		printf("i %d pin %d\n", i++, read_data[0]);
