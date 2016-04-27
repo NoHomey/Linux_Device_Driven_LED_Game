@@ -37,6 +37,7 @@ void _board_set(struct board* board, uint8_t x, uint8_t y, uint8_t val);
 uint8_t _board_get(struct board* board, uint8_t x, uint8_t y);
 uint8_t _board_new(struct board* board);
 void _board_move_single(struct board* board, int8_t x, int8_t y, int8_t direction_x, int8_t direction_y);
+void _board_change(struct board* board, uint8_t val);
 void _board_move_left(struct board* board);
 void _board_move_right(struct board* board);
 void _board_move_up(struct board* board);

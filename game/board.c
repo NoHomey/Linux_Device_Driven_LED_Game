@@ -54,6 +54,7 @@ void _board_move_single(struct board* board, int8_t x, int8_t y, int8_t directio
 				_board_set(board, x, y, 0);
 				if(_board_get(board, next_x, next_y) == BOARD_MAX_VALUE) {
 					board->state = win;
+					_board_change(board, BOARD_MAX_VALUE);
 				}
 			}
 		}
@@ -98,11 +99,15 @@ void _board_move_down(struct board* board) {
 	}
 }
 
-void board_init(struct board* board, uint8_t x, uint8_t y) {
+void _board_change(struct board* board, uint8_t val) {
 	uint8_t i;
 	for(i = 0; i < BOARD_SIZE; ++i) {
-		board->board[i] = 0;
+		board->board[i] = val;
 	}
+}
+
+void board_init(struct board* board, uint8_t x, uint8_t y) {
+	_board_change(board, 0);
 	board->x = x;
 	board->y = y;
 	board->state = game;
@@ -132,6 +137,7 @@ void board_move(struct board* board, enum direction direction) {
 		}
 		if(!_board_new(board)) {
 			board->state = lose;
+			_board_change(board, BOARD_INIT_VALUE);
 		}
 	}
 }
