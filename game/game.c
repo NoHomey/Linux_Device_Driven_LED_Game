@@ -35,6 +35,7 @@ int main(void) {
 			perror("error while reading\n");
 			return 1;
 		} else if(number) {
+			printf("%d\n", byte);
 			switch(byte) {
 				case 26: {
 					board_move(board, up);
