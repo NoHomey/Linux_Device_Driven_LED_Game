@@ -1,13 +1,14 @@
-#Borislav Stratev:
+# Borislav Stratev:
 
-/input.c
+game/input.c
+lib/comio/como.*
+kernerl_modules/input_pins/*
 
-/kernerl_modules/input_pins/*
+# Ivo Stratev:
 
-#Ivo Stratev:
-
-/game.c
-
-/lib/tlc5947/*
-
-/kernerl_modules/tlc5947/*
+game/game.c
+game/board.*
+lib/comio/comio.h
+lib/comio/comi.*
+lib/tlc5947/*
+kernerl_modules/tlc5947/*
