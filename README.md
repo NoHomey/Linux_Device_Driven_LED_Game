@@ -1,5 +1,5 @@
 # linux-deivice-driven-4-players-2048-clone
-Public repository for a school homework for the `Embedded systems programming practice` course in ***ELSYS (TUES) - Technological shcool "Electronic systems"***.
+Repository for a school homework for the **Embedded systems programming practice** course in ***ELSYS (TUES) - Technological shcool "Electronic systems"***.
 
 The task for the homework was to:
 
